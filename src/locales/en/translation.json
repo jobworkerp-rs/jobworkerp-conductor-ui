@@ -1,0 +1,789 @@
+{
+  "app": {
+    "name": "Conductor UI"
+  },
+  "nav": {
+    "group": "jobworkerp-conductor",
+    "adminUiGroup": "jobworkerp admin-ui",
+    "dashboard": "Dashboard",
+    "servers": "Servers",
+    "schedules": "Schedules",
+    "resultHandlers": "Result Handlers",
+    "slackHandlers": "Slack Events",
+    "executions": "Executions",
+    "settings": "Settings",
+    "opensInNewTab": "{{name}} (opens in a new tab)",
+    "sidebarTitle": "Navigation",
+    "sidebarDescription": "Links to each screen"
+  },
+  "pages": {
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "conductor configuration, executions, and connected jobworkerp servers"
+    },
+    "servers": {
+      "title": "Servers",
+      "description": "jobworkerp servers that conductor connects to"
+    },
+    "schedules": {
+      "title": "Schedules",
+      "description": "Workflows and workers run on a cron schedule"
+    },
+    "resultHandlers": {
+      "title": "Result Handlers",
+      "description": "Watch job results of a jobworkerp worker and run follow-up processing"
+    },
+    "slackHandlers": {
+      "title": "Slack Events",
+      "description": "Run processing triggered by Slack messages or reactions"
+    },
+    "executions": {
+      "title": "Executions",
+      "description": "Status and history of executions started by each configuration"
+    },
+    "executionDetail": {
+      "title": "Execution details",
+      "description": "Status and records of execution {{id}}"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Connections, configuration import/export, and display preferences"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The requested page does not exist.",
+      "backToDashboard": "Back to the dashboard"
+    },
+    "comingSoon": "This screen is not available yet."
+  },
+  "header": {
+    "toggleSidebar": "Toggle sidebar",
+    "autoRefresh": "Auto refresh",
+    "theme": "Change theme",
+    "languagePrefix": "Change language: ",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
+  },
+  "languages": {
+    "ja": "日本語",
+    "en": "English"
+  },
+  "connection": {
+    "connected": "Connected to the conductor API",
+    "checking": "Connecting to the conductor API…",
+    "disconnected": "Cannot reach the conductor API",
+    "bannerTitle": "Cannot reach the conductor API",
+    "bannerDescription": "No response from {{url}}. Check that conductor runs with gRPC-Web enabled and that the URL in the runtime configuration is correct."
+  },
+  "config": {
+    "invalidTitle": "The runtime configuration is invalid",
+    "invalidDescription": "Fix the container environment variables (CONDUCTOR_UI_*) or config.js.",
+    "fields": {
+      "conductorUrl": "conductor API URL",
+      "jobworkerpServers": "jobworkerp server mapping",
+      "cronTimezone": "Cron time zone",
+      "defaultLanguage": "Default language",
+      "defaultTheme": "Default theme"
+    },
+    "errors": {
+      "invalid_url": "{{field}}: specify an http or https URL",
+      "invalid_json": "{{field}}: not valid JSON",
+      "invalid_servers": "{{field}}: specify an array of objects with a name",
+      "duplicate_server": "{{field}}: the server name \"{{detail}}\" is duplicated",
+      "invalid_timezone": "{{field}}: not an IANA time zone name",
+      "invalid_language": "{{field}}: specify ja or en",
+      "invalid_theme": "{{field}}: specify light, dark or system"
+    },
+    "serverDetail": " (server \"{{detail}}\")"
+  },
+  "errors": {
+    "network": "Could not reach the server",
+    "http": "The endpoint did not respond as gRPC-Web (HTTP {{status}})",
+    "aborted": "The operation was interrupted",
+    "unknown": "An unexpected error occurred",
+    "details": "Details",
+    "status": {
+      "cancelled": "The operation was cancelled",
+      "unknown": "An unknown error occurred on the server",
+      "invalid_argument": "The input is invalid",
+      "deadline_exceeded": "The server did not respond in time",
+      "not_found": "The item was not found",
+      "already_exists": "A configuration with the same name already exists",
+      "permission_denied": "This operation is not permitted",
+      "resource_exhausted": "The server is out of resources",
+      "failed_precondition": "This cannot be done in the current state",
+      "aborted": "The operation was aborted because of a conflict",
+      "out_of_range": "A value is out of range",
+      "unimplemented": "This operation is not supported. conductor may be outdated",
+      "internal": "The server could not process the request",
+      "unavailable": "The server is temporarily unable to process requests",
+      "data_loss": "Data may have been lost",
+      "unauthenticated": "Authentication is required",
+      "default": "An error occurred on the server"
+    }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "OK",
+    "close": "Close",
+    "previous": "Previous",
+    "next": "Next",
+    "loading": "Loading…",
+    "empty": "No items to show",
+    "items_one": "{{count}} item",
+    "items_other": "{{count}} items",
+    "pageRange": "{{from}}–{{to}} of {{total}}",
+    "enabled": "Enabled",
+    "toggleEnabled": "Enable or disable {{name}}",
+    "typeToConfirm": "Type {{text}} to confirm",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "saving": "Saving…",
+    "disabled": "Disabled",
+    "actions": "Actions",
+    "retry": "Retry",
+    "notSet": "Not set",
+    "listScaleWarning": "There are {{count}} entries. Lists over {{limit}} entries may display slowly.",
+    "editItem": "Edit {{name}}",
+    "deleteItem": "Delete {{name}}",
+    "back": "Back",
+    "formErrors": {
+      "required": "This field is required",
+      "tooLong": "Too long (up to {{max}} characters)"
+    },
+    "historyItem": "Executions of {{name}}",
+    "unknownServer": "(server {{id}} not found)",
+    "deleted": "Deleted",
+    "duplicateName": "This name is already used. Saving will fail.",
+    "filters": {
+      "search": "Search by name",
+      "status": "Status",
+      "allStatuses": "All statuses"
+    },
+    "pageRangeOpen": "{{from}}–{{to}}"
+  },
+  "references": {
+    "kind": {
+      "schedule": "Schedule",
+      "slackHandler": "Slack event",
+      "resultHandler": "Result handler"
+    },
+    "roles": {
+      "target": "Runs there",
+      "listen": "Watches it",
+      "process": "Processes there"
+    },
+    "more_one": "and {{count}} more",
+    "more_other": "and {{count}} more",
+    "kindGroups": {
+      "schedule": "Schedules",
+      "slackHandler": "Slack Events",
+      "resultHandler": "Result Handlers"
+    }
+  },
+  "servers": {
+    "columns": {
+      "name": "Name",
+      "endpoint": "Endpoint (from conductor)",
+      "status": "Status",
+      "reachability": "jobworkerp",
+      "references": "Used by",
+      "updatedAt": "Updated"
+    },
+    "reach": {
+      "reachable": "Reachable",
+      "unreachable": "Unreachable",
+      "checking": "Checking…",
+      "notConfigured": "Not linked"
+    },
+    "sslTitle": "SSL/TLS",
+    "notFound": "Server {{id}} was not found. It may have been deleted.",
+    "detail": {
+      "basic": "Basic information",
+      "endpoint": "Endpoint",
+      "ssl": "SSL",
+      "sslOn": "Used",
+      "sslOff": "Not used",
+      "status": "Status",
+      "grpcWebUrl": "Browser gRPC-Web URL",
+      "adminUiUrl": "admin-ui",
+      "fromRuntimeConfig": "(runtime configuration)",
+      "createdAt": "Created",
+      "updatedAt": "Updated",
+      "openAdminUi": "Open admin-ui",
+      "jobworkerpTitle": "jobworkerp status",
+      "jobworkerpDescription": "Fetched from the browser over gRPC-Web",
+      "notConfigured": "This server has no browser URL in the runtime configuration (CONDUCTOR_UI_JOBWORKERP_SERVERS), so its jobworkerp status cannot be shown.",
+      "channels": "Workers by channel",
+      "defaultChannel": "(default)",
+      "adminWorkers": "Workers",
+      "adminJobs": "Jobs",
+      "adminResults": "Results",
+      "referencesTitle": "Configurations using this server",
+      "referencesDescription": "Consider where to move these before deleting the server",
+      "referencesEmpty": "No configuration uses this server.",
+      "kind": "Kind",
+      "role": "Usage"
+    },
+    "form": {
+      "createTitle": "Create server",
+      "createDescription": "Register a jobworkerp server that conductor connects to",
+      "editTitle": "Edit server",
+      "editDescription": "Change how conductor connects to {{name}}",
+      "name": "Name",
+      "nameHelp": "A unique name (up to {{max}} characters)",
+      "host": "Host",
+      "hostHelp": "Host name or IP address reachable from conductor. Write IPv6 addresses in brackets, e.g. [::1]",
+      "port": "Port",
+      "ssl": "Use SSL/TLS",
+      "description": "Description",
+      "enabled": "Enabled",
+      "browserUrlNote": "The URLs the browser uses for jobworkerp (gRPC-Web, admin-ui) come from the runtime configuration, not from this screen.",
+      "duplicateName": "This name is already used by another server. Saving will fail.",
+      "created": "Server created",
+      "saved": "Server saved",
+      "errors": {
+        "invalidHost": "Enter a host name or IP address, without scheme, port or path",
+        "portRange": "Enter a whole number from 1 to 65535"
+      }
+    },
+    "delete": {
+      "title": "Delete {{name}}?",
+      "description": "This cannot be undone.",
+      "referencedDescription_one": "This server is used by {{count}} configuration. It will no longer run after the server is deleted.",
+      "referencedDescription_other": "This server is used by {{count}} configurations. They will no longer run after the server is deleted.",
+      "confirmAnyway": "Delete anyway",
+      "deleted": "Server deleted",
+      "checking": "Checking which configurations use this server…"
+    },
+    "stats": {
+      "workers": "Workers",
+      "running": "Running",
+      "pending": "Pending"
+    }
+  },
+  "executionTarget": {
+    "legend": "Execution target",
+    "server": "Server",
+    "serverHelp": "The jobworkerp server that runs it",
+    "serverPlaceholder": "Select a server",
+    "serverDisabled": "{{name}} (disabled)",
+    "method": "Method",
+    "methods": {
+      "worker": {
+        "label": "Registered worker",
+        "description": "Run a worker registered in jobworkerp, any runner"
+      },
+      "workflowUrl": {
+        "label": "Workflow (URL or path)",
+        "description": "Run a workflow definition at a URL or a path conductor can read"
+      },
+      "workflowInline": {
+        "label": "Workflow (written here)",
+        "description": "Store the definition written here in jobworkerp and run it"
+      }
+    },
+    "inlineUnavailableReason": "Needs a browser URL for this server's jobworkerp in the runtime configuration (CONDUCTOR_UI_JOBWORKERP_SERVERS).",
+    "workerName": "Worker name",
+    "workerNameHelp": "Pick from the server's workers or type a name",
+    "workerNotFound": "No worker with this name exists on the server.",
+    "workerRunner": "Runner: {{runner}}",
+    "openWorker": "Open in admin-ui",
+    "using": "Method (using)",
+    "usingHelp": "For runners with several methods",
+    "usingCandidates": "Methods: {{methods}}",
+    "workflowUrl": "Workflow URL",
+    "workflowUrlHelp": "A URL or a path conductor can read",
+    "workflowUrlHelpSlack": "Must start with http://, https:// or file://, must not contain \"..\", and is limited to {{max}} characters",
+    "channel": "Channel",
+    "channelHelp": "jobworkerp job channel; leave empty for the default channel",
+    "channelHelpInline": "Stored as the channel of the worker holding the definition; leave empty for the default channel",
+    "definition": {
+      "label": "Workflow definition",
+      "errors": {
+        "syntax": "Syntax error at line {{line}}, column {{column}}",
+        "notObject": "The definition must be a mapping (YAML) or an object (JSON)"
+      }
+    },
+    "definitionHelp": "YAML or JSON. Checked for syntax here; jobworkerp checks the workflow when it runs.",
+    "insertTemplate": "Insert template",
+    "managedWorkerName": "Stored as worker",
+    "managedWorkerNameHelp": "Name of the worker that stores the definition in jobworkerp",
+    "managedWorkerMissing": "The worker storing this definition was not found in jobworkerp. Saving creates it again.",
+    "args": {
+      "label": "Arguments",
+      "errors": {
+        "invalidJson": "Not valid JSON",
+        "tooLarge": "Too large (up to {{kb}} KB)",
+        "slackObject": "Use a JSON object; conductor drops other values for Slack events",
+        "slackEvent": "Do not use \"slack_event\" at the top level; conductor puts the Slack event there"
+      }
+    },
+    "argsHelp": "JSON, up to {{kb}} KB",
+    "formatArgs": "Format",
+    "argsReserved": "{{names}} is also an argument of the WORKFLOW runner. conductor then passes the arguments to the runner as they are instead of as the workflow input, so the workflow behaves differently from a URL target.",
+    "shapeTitle": "What the target receives",
+    "shape": {
+      "schedule": "The arguments as they are.",
+      "slackHandler": "The arguments with the Slack event added as \"slack_event\".",
+      "resultHandler": "An object with the watched job's result as \"result\" and the arguments as \"args\".",
+      "workflow": "For a workflow, this becomes its input."
+    },
+    "errors": {
+      "workerNameSyntax": "Start with a letter; use only letters, digits, - and _",
+      "nameTaken": "A worker named {{name}} already exists and is not managed by this UI. Choose another name.",
+      "rollbackFailed": "Saving failed, and the worker {{name}} could not be restored in jobworkerp. Check it in admin-ui.",
+      "inlineUnavailable": "This method needs a browser URL for the server's jobworkerp in the runtime configuration.",
+      "noWorkflowRunner": "This jobworkerp has no WORKFLOW runner.",
+      "slackWorkflowUrl": "Start with http://, https:// or file://, do not use \"..\", and stay within {{max}} characters"
+    }
+  },
+  "settings": {
+    "delete": {
+      "title": "Delete {{name}}?",
+      "description": "This cannot be undone.",
+      "alsoDeleteWorker": "Also delete the worker {{worker}} that stores its workflow definition in jobworkerp",
+      "cleanupFailed": "The worker {{worker}} could not be deleted from jobworkerp"
+    },
+    "deleteObsoleteWorker": "Delete the worker {{worker}} on {{server}}, which this save leaves unused",
+    "targetSummary": {
+      "worker": "Worker: {{name}}",
+      "workflowUrl": "Workflow: {{url}}",
+      "workflowInline": "Workflow written here (worker {{name}})"
+    },
+    "form": {
+      "name": "Name",
+      "nameHelp": "A unique name (up to {{max}} characters)",
+      "description": "Description",
+      "enabled": "Enabled"
+    }
+  },
+  "resultHandlers": {
+    "columns": {
+      "name": "Name",
+      "listen": "Watches",
+      "process": "Runs on",
+      "status": "Status"
+    },
+    "form": {
+      "createTitle": "Create result handler",
+      "createDescription": "Run a follow-up when a jobworkerp worker produces a result",
+      "editTitle": "Edit result handler",
+      "editDescription": "Change what runs after {{name}}'s watched worker",
+      "listenServer": "Watched server",
+      "listenServerHelp": "The jobworkerp server whose worker is watched",
+      "listenWorker": "Watched worker",
+      "listenWorkerHelp": "Pick from the server's workers or type a name",
+      "notBroadcasting": "This worker does not broadcast its results, so conductor never sees them. Turn on \"broadcast results\" for it in admin-ui.",
+      "listenWorkerMissing": "No worker with this name exists on the server.",
+      "conditionsTitle": "When the follow-up runs",
+      "conditionBroadcast": "The watched worker broadcasts its results.",
+      "conditionSuccess": "The watched job succeeds and its output is not empty.",
+      "created": "Result handler created",
+      "saved": "Result handler saved"
+    },
+    "notFound": "Result handler {{id}} was not found. It may have been deleted."
+  },
+  "slackHandlers": {
+    "columns": {
+      "name": "Name",
+      "kind": "Kind",
+      "conditions": "Conditions",
+      "server": "Runs on",
+      "status": "Status"
+    },
+    "kinds": {
+      "message": "Message",
+      "reaction": "Reaction"
+    },
+    "summary": "{{total}} in total ({{messages}} message, {{reactions}} reaction) · {{enabled}} enabled · {{channels}} channels watched",
+    "filters": {
+      "kind": "Kind",
+      "allKinds": "All kinds",
+      "channel": "Channel",
+      "allChannels": "All channels"
+    },
+    "conditions": {
+      "allChannels": "All channels",
+      "channel": "Channel {{id}}",
+      "pattern": "Text matches {{pattern}}",
+      "mention": "Mention required",
+      "reactions": "Reactions {{names}}",
+      "anyReaction": "Any reaction",
+      "userFilter": "Users matching {{filter}}",
+      "operations": {
+        "added": "added",
+        "removed": "removed",
+        "both": "added or removed"
+      }
+    },
+    "form": {
+      "createTitle": "Create Slack event handler",
+      "createDescription": "Run processing when a Slack message or reaction matches",
+      "editTitle": "Edit Slack event handler",
+      "editDescription": "Change when {{name}} runs and what it runs",
+      "kind": "Event",
+      "channelId": "Slack channel ID",
+      "channelIdHelp": "An ID starting with C or G; leave empty for all channels",
+      "messagePattern": "Message pattern",
+      "patternHelp": "conductor's regular expression syntax (Rust regex), up to {{max}} bytes",
+      "mentionRequired": "Only when the bot is mentioned",
+      "messageConditionHelp": "Set a pattern, require a mention, or both.",
+      "reactionNames": "Reactions",
+      "reactionNamesHelp": "Type names and press Enter; colons are removed. Leave empty for any reaction.",
+      "addReaction": "Add",
+      "removeReaction": "Remove {{name}}",
+      "reactionOperation": "Reaction event",
+      "operations": {
+        "added": "Added",
+        "removed": "Removed",
+        "both": "Added or removed"
+      },
+      "reactionUserFilter": "Reacting users",
+      "reactionUserFilterHelp": "A pattern for the user ID (Rust regex); leave empty for all users",
+      "sample": "Try a text",
+      "sampleResultMatch": "Matches",
+      "sampleResultNoMatch": "Does not match",
+      "regexUnavailable": "Patterns are checked by conductor when saving.",
+      "createdEnabled": "A new handler is always created enabled; disable it from the list afterwards.",
+      "created": "Slack event handler created",
+      "saved": "Slack event handler saved",
+      "errors": {
+        "needCondition": "Enter a pattern or turn on \"only when mentioned\"",
+        "regex": "conductor cannot use this pattern",
+        "patternTooLong": "Too long (up to {{max}} bytes)",
+        "tooManyReactions": "Up to {{max}} reactions",
+        "invalidReaction": "\"{{name}}\" is not a valid reaction name (letters, digits, _, - and +, up to 100 bytes)",
+        "channelId": "Enter a Slack channel ID starting with C or G"
+      }
+    },
+    "notFound": "Slack event handler {{id}} was not found. It may have been deleted."
+  },
+  "schedules": {
+    "columns": {
+      "name": "Name",
+      "crontab": "Cron expression",
+      "nextRun": "Next run",
+      "server": "Runs on",
+      "status": "Status"
+    },
+    "summary": "{{total}} in total, {{enabled}} enabled",
+    "nextRunSummary": "Next run: {{time}} ({{name}})",
+    "noNextRun": "Nothing scheduled",
+    "timeZoneNote": "Runs are shown in the cron time zone, {{zone}}.",
+    "filters": {
+      "server": "Runs on",
+      "allServers": "All servers"
+    },
+    "runNow": "Run {{name}} now",
+    "cron": {
+      "label": "Cron expression",
+      "help": "Second minute hour day month weekday (year optional). Aliases such as @daily work too",
+      "presets": "Presets",
+      "preset": {
+        "everyMinute": "Every minute",
+        "hourly": "Every hour",
+        "daily": "Daily 9:00",
+        "weekdays": "Weekdays 9:00",
+        "weekly": "Mondays 9:00",
+        "monthly": "1st of the month 0:00"
+      },
+      "empty": "Enter an expression to see what it means and when it runs.",
+      "secondsAdded": "This expression has five fields; it is saved as \"{{expression}}\", with a zero seconds field first.",
+      "bothDays": "Both the day of the month and the day of the week are given: conductor runs only on days matching both (AND), unlike the usual cron, which runs on days matching either.",
+      "nextRuns": "Next runs ({{zone}})",
+      "invalid": "conductor cannot schedule this expression: {{detail}}",
+      "noRun": "No run time found for this expression: {{detail}}",
+      "timeZoneUnset": "No cron time zone is configured, so runs are computed in UTC; this may differ from conductor's (CONDUCTOR_CRON_TIMEZONE).",
+      "daylightSaving": "{{zone}} observes daylight saving time. conductor keeps using the UTC offset from when it registered the schedule, so after a change actual runs may differ from the times shown.",
+      "loading": "Loading conductor's cron rules…",
+      "unavailable": "conductor's cron rules could not be loaded, so expressions cannot be checked. Saving is not possible until they load.",
+      "timeZoneRejected": "conductor cannot read the time zone \"{{name}}\", so it runs schedules in UTC; the runs are computed in UTC too."
+    },
+    "form": {
+      "createTitle": "Create schedule",
+      "createDescription": "Run a workflow or worker on a cron schedule",
+      "editTitle": "Edit schedule",
+      "editDescription": "Change when and what {{name}} runs",
+      "jobTimeout": "Job timeout (seconds)",
+      "jobTimeoutHelp": "Blank uses conductor's default ({{default}} seconds); 0 means no limit. For runners that stream their results, it limits how long output may pause, not the total run time.",
+      "created": "Schedule created",
+      "saved": "Schedule saved",
+      "errors": {
+        "crontab": "conductor cannot use this cron expression",
+        "cronUnavailable": "Cannot save: the cron expression cannot be checked",
+        "jobTimeout": "Enter a whole number from 0 to {{max}}"
+      }
+    },
+    "notFound": "Schedule {{id}} was not found. It may have been deleted.",
+    "run": {
+      "title": "Run {{name}} now?",
+      "description": "Runs the configured target once.",
+      "confirm": "Run",
+      "target": "Target",
+      "server": "Runs on",
+      "args": "Args sent",
+      "noArgs": "(none)",
+      "scheduleDisabled": "This schedule is disabled, but it can still be run manually.",
+      "serverDisabled": "The server {{name}} is disabled, but the schedule can still be run manually.",
+      "override": "Replace the args for this run only",
+      "overrideLabel": "Args for this run",
+      "overrideHelp": "Replaces the configured args as a whole; they are not merged. JSON, up to {{kb}} KB"
+    },
+    "nextRun": {
+      "refused": "conductor cannot schedule this expression",
+      "noRun": "No run time found",
+      "unknown": "Unknown",
+      "unavailable": "conductor's cron rules could not be loaded, so next runs cannot be shown."
+    }
+  },
+  "executions": {
+    "status": {
+      "unspecified": "Unknown",
+      "pending": "Pending",
+      "running": "Running",
+      "waitResult": "Waiting for result",
+      "cancelling": "Cancelling",
+      "succeeded": "Succeeded",
+      "failed": "Failed",
+      "cancelled": "Cancelled",
+      "unknown": "Unknown",
+      "unavailable": "Unavailable",
+      "enqueueFailed": "Enqueue failed"
+    },
+    "sourceKinds": {
+      "schedule": "Schedule",
+      "slackHandler": "Slack event",
+      "resultHandler": "Result handler"
+    },
+    "columns": {
+      "status": "Status",
+      "source": "Started by",
+      "jobId": "Job ID",
+      "server": "Runs on",
+      "triggeredAt": "Started at",
+      "duration": "Duration",
+      "latest": "Latest run"
+    },
+    "filters": {
+      "sourceType": "Started by",
+      "allSourceTypes": "All sources",
+      "server": "Runs on",
+      "allServers": "All servers",
+      "period": "Period",
+      "periods": {
+        "all": "All time",
+        "1h": "Last hour",
+        "24h": "Last 24 hours",
+        "7d": "Last 7 days",
+        "custom": "Custom range"
+      },
+      "from": "From",
+      "to": "To",
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "statusPageOnly": "The status filter applies to the executions on this page only.",
+      "source": "Started by: {{name}} ({{kind}})",
+      "clearSource": "Show executions of every source",
+      "sourceLimits": "While filtering by one source, period and server filters are unavailable and the total is not known."
+    },
+    "reasons": {
+      "notCancellable": "Only pending, running or waiting executions can be cancelled",
+      "noJobId": "The job ID is not known yet, so it cannot be cancelled",
+      "notSchedule": "Only executions started by a schedule can be re-run",
+      "notFinished": "Only finished executions (succeeded, failed, cancelled or not enqueued) can be deleted"
+    },
+    "actions": {
+      "menu": "Actions for execution {{id}}",
+      "details": "Details",
+      "cancel": "Cancel",
+      "reExecute": "Re-run",
+      "openSetting": "Open setting",
+      "delete": "Delete"
+    },
+    "cancel": {
+      "title": "Cancel execution {{id}}?",
+      "description": "Asks jobworkerp to cancel job {{jobId}}.",
+      "confirm": "Cancel execution",
+      "done": "Cancellation requested",
+      "nothing": "There was no job to cancel; it may have finished already."
+    },
+    "reExecute": {
+      "title": "Re-run {{name}}?",
+      "description": "Runs the schedule with its current settings, not with the args of the original execution.",
+      "confirm": "Re-run"
+    },
+    "delete": {
+      "title": "Delete execution {{id}}?",
+      "description": "Deletes conductor's record of the execution. jobworkerp's job result is kept.",
+      "alreadyGone": "It had already been deleted"
+    },
+    "deleteBySource": {
+      "button": "Delete this source's history",
+      "title": "Delete all executions of {{name}}?",
+      "description": "Deletes the records of finished executions.",
+      "includeActive": "Include unfinished executions (their records go too, so their status can no longer be followed)",
+      "done_one": "Deleted {{count}} execution",
+      "done_other": "Deleted {{count}} executions"
+    },
+    "trigger": {
+      "accepted": "{{name}} accepted for a run",
+      "acceptedStatus": "Status: {{status}}",
+      "enqueueFailed": "{{name}} could not be run",
+      "viewExecution": "View the execution"
+    },
+    "statusSources": {
+      "unspecified": "Unknown",
+      "jobProcessingStatus": "jobworkerp processing status",
+      "jobResult": "jobworkerp job result",
+      "executionRef": "conductor's record",
+      "unavailable": "Unavailable"
+    },
+    "detail": {
+      "status": "Status",
+      "statusSource": "Observed from",
+      "observedAt": "Observed at",
+      "statusDetail": "Status detail",
+      "source": "Started by",
+      "server": "Runs on",
+      "jobId": "Job ID",
+      "triggeredAt": "Started at",
+      "createdAt": "Recorded at",
+      "resultStatus": "Result when finished",
+      "enqueueError": "Why it was not enqueued",
+      "context": "Trigger context",
+      "copy": "Copy",
+      "copied": "Copied",
+      "jobResult": "Job result",
+      "jobStatus": "Result status",
+      "startedAt": "Started",
+      "endedAt": "Ended",
+      "duration": "Duration",
+      "output": "Output",
+      "outputTruncated": "Showing the first {{bytes}} bytes",
+      "noResult": "jobworkerp has no result for this job: the worker does not store it, or the job has not finished.",
+      "notLinked": "No jobworkerp link is configured for this server, so the job result cannot be shown.",
+      "notFinished": "The job result is shown once the execution has finished.",
+      "openJob": "Open the job in admin-ui",
+      "openResult": "Open the result in admin-ui",
+      "notFound": "Execution {{id}} was not found. It may have been deleted.",
+      "sourceGone": "(deleted setting)"
+    }
+  },
+  "dashboard": {
+    "cards": {
+      "schedules": "Schedules",
+      "slackHandlers": "Slack events",
+      "resultHandlers": "Result handlers",
+      "servers": "jobworkerp servers",
+      "enabled": "{{enabled}} of {{total}} enabled",
+      "reachable": "{{reachable}} of {{linked}} linked reachable"
+    },
+    "recent": {
+      "title": "Recent executions",
+      "description": "Running or failed among the latest {{count}} executions of the last 24 hours",
+      "none": "Nothing running or failed",
+      "all": "View executions"
+    },
+    "nextRuns": {
+      "title": "Next runs",
+      "description": "Enabled schedules, soonest first ({{zone}})",
+      "none": "No schedule is due to run"
+    },
+    "servers": {
+      "title": "jobworkerp servers",
+      "references": "Schedules {{schedule}} · Slack events {{slackHandler}} · Result handlers {{resultHandler}}",
+      "openAdminUi": "Open admin-ui",
+      "none": "No server is registered"
+    }
+  },
+  "settingsPage": {
+    "connections": {
+      "title": "Connections",
+      "description": "Read from the runtime configuration. To change them, edit the container's CONDUCTOR_UI_* environment variables or config.js, then reload the page.",
+      "conductorUrl": "conductor admin API",
+      "cronTimeZone": "Cron time zone",
+      "servers": "jobworkerp links",
+      "noServers": "No jobworkerp server is linked (CONDUCTOR_UI_JOBWORKERP_SERVERS).",
+      "columns": {
+        "name": "Server",
+        "grpcWebUrl": "gRPC-Web URL",
+        "adminUiUrl": "admin-ui URL",
+        "reachability": "Status"
+      }
+    },
+    "display": {
+      "title": "Display",
+      "description": "Saved in this browser.",
+      "language": "Language",
+      "followBrowser": "Follow the browser",
+      "theme": "Theme",
+      "interval": "Auto refresh interval",
+      "intervalHelp": "While anything is running, lists refresh every 5 seconds. Pause auto refresh with the switch in the header.",
+      "seconds": "Every {{seconds}} seconds"
+    },
+    "export": {
+      "title": "Export",
+      "description": "Download every setting (servers, schedules, Slack events, result handlers) as one TOML file, with descriptions and enabled state.",
+      "scope": "Settings to export",
+      "scopeAll": "All",
+      "scopeEnabled": "Enabled only",
+      "enabledHelp": "The servers the exported settings run on are included even when disabled, so the file can be imported as it is.",
+      "download": "Download TOML",
+      "failed": "Export failed: {{message}}",
+      "managedNotice": "These settings keep their workflow definition in a jobworkerp worker, and the TOML file only names that worker. Back the workers up separately, e.g. from admin-ui.",
+      "unverified": "(cannot be checked from this browser)",
+      "leftOut_one": "{{count}} setting was left out of the file: the server it runs on has been deleted",
+      "leftOut_other": "{{count}} settings were left out of the file: the servers they run on have been deleted"
+    },
+    "import": {
+      "title": "Import",
+      "description": "Validate a TOML file first, then import it. Nothing is written unless every entry can be imported.",
+      "file": "TOML file",
+      "toml": "TOML",
+      "tomlHelp": "Choose a file, drop one here, or paste the content.",
+      "overwrite": "Overwrite existing settings",
+      "overwriteHelp": "Overwriting deletes every existing setting first, then imports the file. Execution history is kept.",
+      "newIds": "Imported settings get new IDs, so execution history recorded before no longer links to them.",
+      "reuseServers": "A server with the same name and address as an existing one is reused; any other name already in use is an error.",
+      "validate": "Validate",
+      "import": "Import",
+      "changed": "The content or the overwrite option changed; validate again.",
+      "valid": "Ready to import:",
+      "invalid_one": "{{count}} entry cannot be imported; nothing will be written:",
+      "invalid_other": "{{count}} entries cannot be imported; nothing will be written:",
+      "counts": {
+        "servers_one": "{{count}} server",
+        "servers_other": "{{count}} servers",
+        "schedules_one": "{{count}} schedule",
+        "schedules_other": "{{count}} schedules",
+        "slackHandlers_one": "{{count}} Slack event handler",
+        "slackHandlers_other": "{{count}} Slack event handlers",
+        "resultHandlers_one": "{{count}} result handler",
+        "resultHandlers_other": "{{count}} result handlers"
+      },
+      "confirmTitle": "Overwrite every setting?",
+      "done": "Imported {{servers}} servers, {{schedules}} schedules, {{slackHandlers}} Slack event handlers and {{resultHandlers}} result handlers"
+    },
+    "clear": {
+      "title": "Danger zone",
+      "description": "Deleting every setting cannot be undone. Export the settings first.",
+      "exportFirst": "Export all settings first",
+      "button": "Delete all settings",
+      "dialogTitle": "Delete all settings?",
+      "dialogDescription": "Every server, schedule, Slack event handler and result handler is deleted. This cannot be undone.",
+      "historyKept": "Execution history is kept.",
+      "deleteWorkers_one": "Also delete {{count}} managed workflow worker (the inline workflow definitions)",
+      "deleteWorkers_other": "Also delete {{count}} managed workflow workers (the inline workflow definitions)",
+      "unverified_one": "{{count}} setting uses a worker that looks managed but cannot be checked from this browser; delete it from admin-ui if needed.",
+      "unverified_other": "{{count}} settings use workers that look managed but cannot be checked from this browser; delete them from admin-ui if needed.",
+      "done": "All settings deleted",
+      "workersFailed": "Some managed workers could not be deleted"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+[package]
+name = "wasm-abi"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+description = "The plain C ABI the browser modules share: memory for host strings and the last error message"

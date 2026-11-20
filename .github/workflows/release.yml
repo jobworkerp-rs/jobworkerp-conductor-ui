@@ -1,0 +1,236 @@
+name: Release
+
+# Runs on the public GitHub repository only, when the internal publishing sync
+# pushes a release tag (see the README). It builds the static archive from the
+# tagged sources, checks the container image built from it, publishes the
+# archive as a GitHub Release, then pushes the image. Tests run before the
+# sync, on the internal CI.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  IMAGE: ghcr.io/jobworkerp-rs/jobworkerp-conductor-ui
+  BUILDKIT: moby/buildkit:v0.35.0@sha256:aa632b921ef07411d2cb77292cd34213d4f7b384001d6fceef1e1f25bf9752bb
+
+jobs:
+  build:
+    name: Build the static archive
+    if: github.server_url == 'https://github.com'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The pnpm version comes from package.json's packageManager.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The tag name reaches the shell through the environment, never by
+      # template expansion into the script.
+      - name: Verify release tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: bash scripts/check-release-tag.sh "${TAG}"
+
+      # cargo-about reads the WebAssembly crates through cargo.
+      - name: Read the pinned Rust version
+        id: rust
+        run: echo "toolchain=$(bash scripts/build-wasm.sh --print-toolchain)" >>"${GITHUB_OUTPUT}"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+        with:
+          toolchain: ${{ steps.rust.outputs.toolchain }}
+
+      # Exports CARGO_ABOUT for the build.
+      - name: Install cargo-about
+        run: bash scripts/install-cargo-about.sh "${RUNNER_TEMP}/cargo-about"
+
+      - name: Build the release
+        run: bash scripts/build-release.sh
+
+      - name: Upload the archive
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: archive
+          path: .release/jobworkerp-conductor-ui-v*.tar.gz
+          if-no-files-found: error
+          compression-level: 0
+
+  # Nothing is published unless the image built from the archive serves it.
+  image-verify:
+    name: Check the container image
+    if: github.server_url == 'https://github.com'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download the archive
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: archive
+          path: dist
+
+      - name: Unpack the archive
+        id: version
+        run: |
+          bash scripts/unpack-release.sh dist/jobworkerp-conductor-ui-v*.tar.gz
+          echo "version=${GITHUB_REF_NAME#v}" >>"${GITHUB_OUTPUT}"
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          driver-opts: image=${{ env.BUILDKIT }}
+
+      - name: Build the image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          build-args: VERSION=${{ steps.version.outputs.version }}
+          tags: conductor-ui:verify
+          load: true
+          push: false
+
+      - name: Check the image
+        run: bash scripts/test-image.sh conductor-ui:verify
+
+  publish:
+    name: Publish GitHub Release
+    if: github.server_url == 'https://github.com'
+    needs: image-verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download the archive
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: archive
+          path: dist
+
+      - name: Write checksums and release notes
+        run: |
+          ls -l dist
+          (cd dist && sha256sum -- *.tar.gz >SHA256SUMS && cat SHA256SUMS)
+          # The release sync commit lists the changes since the previous release.
+          git log -1 --format=%B >release-notes.md
+          cat release-notes.md
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/*.tar.gz
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body_path: release-notes.md
+          fail_on_unmatched_files: true
+          files: |
+            dist/*.tar.gz
+            dist/SHA256SUMS
+
+  # Runs after the release exists, so `latest` never points at an image whose
+  # archive is not published. The Dockerfile only copies files, so arm64
+  # needs no emulation.
+  image:
+    name: Publish the container image
+    if: github.server_url == 'https://github.com'
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download the archive
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: archive
+          path: dist
+
+      - name: Unpack the archive
+        id: version
+        run: |
+          bash scripts/unpack-release.sh dist/jobworkerp-conductor-ui-v*.tar.gz
+          echo "version=${GITHUB_REF_NAME#v}" >>"${GITHUB_OUTPUT}"
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          driver-opts: image=${{ env.BUILDKIT }}
+
+      - name: Log in to GHCR
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        id: push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          build-args: VERSION=${{ steps.version.outputs.version }}
+          tags: |
+            ${{ env.IMAGE }}:${{ github.ref_name }}
+            ${{ env.IMAGE }}:latest
+          push: true
+
+      - name: Attest image provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

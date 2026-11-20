@@ -1,0 +1,18 @@
+[workspace]
+members = ["abi", "slack-regex", "cron", "unbind"]
+# The modules; wasm-unbind is a host tool built separately by build-wasm.sh.
+default-members = ["slack-regex", "cron"]
+resolver = "3"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+# For wasm-unbind, which runs once per build: compile quickly instead.
+[profile.tool]
+inherits = "dev"
+opt-level = 1
+debug = false

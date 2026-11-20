@@ -1,0 +1,5 @@
+# The image takes only the unpacked release archive and its own files.
+*
+!.release/image/
+!docker/Caddyfile
+!docker/entrypoint.sh

@@ -1,0 +1,26 @@
+node_modules
+dist
+dist-ssr
+# Release archives and the image's staged inputs (scripts/package-release.sh)
+.release
+*.local
+*.log
+coverage
+playwright-report
+test-results
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+.env
+.env.*
+
+# Local proto checkouts used by scripts/sync-protos.sh
+.proto-cache
+.tools
+# pnpm puts its store in the workspace when the home directory is on another
+# filesystem (as on the CI runner).
+.pnpm-store
+
+# Build output of the WebAssembly workspace (scripts/build-wasm.sh)
+wasm/target

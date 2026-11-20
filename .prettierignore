@@ -1,0 +1,13 @@
+dist
+node_modules
+.pnpm-store
+pnpm-lock.yaml
+src/lib/grpc
+src/components/ui
+src/hooks/use-toast.ts
+src/hooks/use-mobile.ts
+proto
+playwright-report
+test-results
+ai-docs
+wasm

@@ -1,0 +1,19 @@
+[package]
+name = "cron"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+description = "conductor's cron expression rules (croner, as tokio-cron-scheduler configures it) for the browser"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# The versions jobworkerp-conductor resolves (through tokio-cron-scheduler
+# 0.15), so the browser accepts the same expressions and computes the same
+# times, time zone data included.
+chrono = "=0.4.45"
+chrono-tz = "=0.10.4"
+croner = "=3.0.1"
+wasm-abi = { path = "../abi" }

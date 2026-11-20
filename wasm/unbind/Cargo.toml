@@ -1,0 +1,10 @@
+[package]
+name = "wasm-unbind"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+description = "Removes wasm-bindgen's leftovers from the browser modules, which the screens load without JavaScript glue"
+
+[dependencies]
+walrus = { version = "=0.28.0", default-features = false }

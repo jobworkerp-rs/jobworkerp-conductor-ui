@@ -1,0 +1,19 @@
+minimumReleaseAge: 4320
+minimumReleaseAgeExclude:
+  - react-router@8.3.0
+blockExoticSubdeps: true
+trustPolicy: no-downgrade
+# semver@6.3.1 (via @babel/core) lacks provenance attestation while later
+# releases have it, so no-downgrade rejects it. It is an expected transitive
+# dep pinned by its parent, so it is excluded rather than weakening the policy.
+trustPolicyExclude:
+  - semver
+overrides:
+  vite: npm:rolldown-vite@7.3.1
+  brace-expansion@1.1.15: 1.1.16
+  js-yaml: 4.3.0
+  flatted: ">=3.4.0 <4.0.0"
+# esbuild (used by tsx for the repository scripts) verifies its platform binary
+# in a postinstall script.
+allowBuilds:
+  esbuild: true

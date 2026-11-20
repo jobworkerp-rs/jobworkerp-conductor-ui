@@ -1,0 +1,136 @@
+syntax = "proto3";
+
+package jobworkerp.function.service;
+
+import "jobworkerp/data/common.proto";
+import "jobworkerp/data/runner.proto";
+import "jobworkerp/data/worker.proto";
+import "jobworkerp/function/data/function.proto";
+
+message FindFunctionRequest {
+  bool exclude_runner = 1;
+  bool exclude_worker = 2;
+}
+
+message FindFunctionSetRequest {
+  // FunctionSet name
+  string name = 1;
+}
+
+// Function search request by name
+message FindFunctionByNameRequest {
+  // Target name to search for (specify either runner name or worker name)
+  oneof name {
+    string runner_name = 1;
+    string worker_name = 2;
+  }
+}
+
+// Function search response (for consistency with existing services)
+message OptionalFunctionSpecsResponse {
+  // Search result (None if not found)
+  optional jobworkerp.function.data.FunctionSpecs data = 1;
+}
+// runner parameters to create as a worker
+message RunnerParameters {
+  // Runner Settings in JSON format (from protobuf schema)
+  string settings_json = 1;
+  // Worker options (from protobuf schema)
+  jobworkerp.function.data.WorkerOptions worker_options = 2;
+}
+message FunctionCallRequest {
+  // Runner or Worker name to execute
+  oneof name {
+    string runner_name = 1;
+    string worker_name = 2;
+  }
+  // Runner parameters (only for runner_name is set)
+  optional RunnerParameters runner_parameters = 3;
+
+  // Job Arguments in JSON format (with protobuf schema:
+  // jobworkerp.data.RunnerData.job_args_proto).
+  //
+  // Pass the contents of the method arguments schema directly here (no
+  // `settings`/`arguments` wrapper). This matches the schema published by
+  // FunctionService.FindList / Find as `FunctionSpecs` and the MCP tool
+  // inputSchema, so the same payload works over both transports:
+  //   - worker_name: provide the worker method's arguments directly. The
+  //     worker's init settings are fixed at creation time, so settings are not
+  //     accepted here. For a WORKFLOW worker's `run` (default) method, provide
+  //     the workflow `input` contents directly; the server wraps them into the
+  //     `input` field automatically.
+  //   - runner_name: provide the method arguments here and the runner init
+  //     settings separately in `runner_parameters.settings_json`. For a WORKFLOW
+  //     runner's `run` method, provide the workflow `input` contents directly.
+  string args_json = 4;
+
+  // Prevent from registering the same keys job in queue at the same time
+  optional string uniq_key = 5;
+
+  // Execution options
+  optional jobworkerp.function.data.FunctionCallOptions options = 6;
+}
+
+// # Create Worker Request
+// Create a Worker from any Runner with detailed configuration
+message CreateWorkerRequest {
+  // Runner identification (either name or id required)
+  oneof runner {
+    string runner_name = 1;    // Runner name (e.g., "COMMAND", "HTTP_REQUEST")
+    jobworkerp.data.RunnerId runner_id = 2;
+  }
+
+  // Worker name (unique identifier)
+  string name = 3;
+
+  // Worker description (optional)
+  optional string description = 4;
+
+  // Runner settings in JSON format (from Runner's settings_schema)
+  // Empty string or null if runner requires no settings
+  optional string settings_json = 5;
+
+  // Worker options (execution configuration)
+  optional jobworkerp.function.data.WorkerOptions worker_options = 6;
+}
+
+// # Create Worker Response
+message CreateWorkerResponse {
+  // Created worker ID
+  jobworkerp.data.WorkerId worker_id = 1;
+
+  // Created worker name
+  string worker_name = 2;
+}
+
+service FunctionService {
+  rpc FindList(FindFunctionRequest)
+      returns (stream jobworkerp.function.data.FunctionSpecs);
+  rpc FindListBySet(FindFunctionSetRequest)
+      returns (stream jobworkerp.function.data.FunctionSpecs);
+
+  // Execute a Runner or Worker function.
+  //
+  // Requirements:
+  // - AUTH_TOKEN environment variable must match jobworkerp-auth metadata header (if set)
+  rpc Call(FunctionCallRequest)
+      returns (stream jobworkerp.function.data.FunctionResult);
+
+  // Function search by function using (FunctionId + optional using)
+  rpc Find(jobworkerp.function.data.FunctionUsing) returns (OptionalFunctionSpecsResponse);
+
+  // Function search by function name
+  rpc FindByName(FindFunctionByNameRequest) returns (OptionalFunctionSpecsResponse);
+
+  // Create a Worker from any Runner with detailed configuration.
+  //
+  // Requirements:
+  // - AUTH_TOKEN environment variable must match jobworkerp-auth metadata header (if set)
+  rpc CreateWorker(CreateWorkerRequest) returns (CreateWorkerResponse);
+
+  // Upsert a Worker: create if not exists, update if name conflicts.
+  //
+  // Requirements:
+  // - AUTH_TOKEN environment variable must match jobworkerp-auth metadata header (if set)
+  rpc UpsertWorker(CreateWorkerRequest) returns (CreateWorkerResponse);
+}

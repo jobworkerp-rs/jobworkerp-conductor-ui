@@ -1,0 +1,253 @@
+syntax = "proto3";
+
+package jobworkerp.function.data;
+
+import "jobworkerp/data/common.proto";
+import "jobworkerp/data/runner.proto";
+import "jobworkerp/data/worker.proto";
+
+// # Function ID
+// Unified identifier for either a Runner or Worker
+// Symmetric design: both runner and worker are at the same level
+message FunctionId {
+  oneof id {
+    jobworkerp.data.RunnerId runner_id = 1;
+    jobworkerp.data.WorkerId worker_id = 2;
+  }
+}
+
+// # Function Using
+// Function identifier with optional using specification
+// Used in Function layer to specify:
+// - Which function to execute (function_id)
+// - Which implementation to use (using, for MCP/Plugin runners)
+//
+// Examples:
+// 1. Normal runner: FunctionUsing { function_id: RunnerId(1), using: None }
+// 2. MCP runner (all tools): FunctionUsing { function_id: RunnerId(100), using: None }
+// 3. MCP runner (specific tool): FunctionUsing { function_id: RunnerId(100), using: Some("fetch_html") }
+// 4. Worker: FunctionUsing { function_id: WorkerId(200), using: None }
+message FunctionUsing {
+  // # Function ID
+  // Reference to the runner or worker
+  FunctionId function_id = 1;
+
+  // # Using
+  // Optional: specifies a particular tool/method within the runner
+  // - For normal runners: ignored (no sub-methods)
+  // - For MCP/Plugin runners:
+  //   - If specified: Only this specific tool is selected
+  //   - If omitted and only 1 tool: auto-selected
+  //   - If omitted and multiple tools: entire runner is selected
+  // - For workers: ignored (workers don't have sub-methods)
+  optional string using = 2;
+}
+
+// # Function Specs
+// Metadata that describes function capabilities and interface for clients
+// Represents either a runner or worker as a function
+message FunctionSpecs {
+  // # Runner Type
+  jobworkerp.data.RunnerType runner_type = 1;
+
+  // # Runner ID
+  // Runner Id for the function
+  jobworkerp.data.RunnerId runner_id = 2;
+
+  // # Worker ID
+  // Worker Id for the function. present if created as a worker
+  optional jobworkerp.data.WorkerId worker_id = 3;
+
+  // # Function Name
+  // Unique identifier for the function (e.g. "command", "image-processor")
+  string name = 4;
+
+  // # Function Description
+  // Human-readable explanation of what the function does
+  string description = 5;
+
+  // # Function Settings Definition (REQUIRED)
+  // JSON schema for function-level settings (e.g., API keys, base URLs)
+  // - For runners without settings: empty string ""
+  // - For workers: empty string "" (workers use WorkerOptions instead)
+  // - Example: "{\"type\": \"object\", \"properties\": {\"api_key\": {\"type\": \"string\"}}}"
+  string settings_schema = 6;
+
+  // # Method Schemas (REQUIRED)
+  // Map of method name to method schema
+  // - Key: method name (e.g., "run", "fetch_html", "get_current_time")
+  // - Value: MethodSchema (input/output schemas, output_type)
+  // - Single-method runners: contains 1 entry (key = "run")
+  // - MCP/Plugin runners: contains multiple entries (keys = tool names)
+  MethodSchemaMap methods = 7;
+}
+
+// # Method Schema Map
+// Container for all method schemas in a function
+// Uses map for O(1) access and consistency with RunnerData.method_proto_map
+message MethodSchemaMap {
+  // # Schemas Map
+  // Key: method name (e.g., "run", "fetch_html", "get_current_time")
+  // Value: MethodSchema (input/output schemas, streaming capability)
+  //
+  // Design rationale for map (not repeated):
+  // - Consistency: Matches RunnerData.method_proto_map structure
+  // - Efficiency: O(1) method lookup by name
+  // - Uniqueness: Protobuf map enforces unique keys
+  map<string, MethodSchema> schemas = 1;
+}
+
+// # Method Schema
+// JSON Schema definition for a single method/tool
+message MethodSchema {
+  // NOTE: method name is stored in map key, not here
+
+  // # Method Description (Optional)
+  // Human-readable explanation of what this method does
+  // Used by LLM for tool selection
+  optional string description = 1;
+
+  // # Arguments JSON Schema (REQUIRED)
+  // JSON Schema defining the input parameters for this method
+  // Example: {"type": "object", "properties": {"url": {"type": "string"}}}
+  string arguments_schema = 2;
+
+  // # Result JSON Schema (Optional)
+  // JSON Schema defining the output structure for this method
+  // None for unstructured/binary output
+  optional string result_schema = 3;
+
+  // # Output Type (REQUIRED)
+  // Streaming capability of this specific method
+  // - NON_STREAMING: Method only supports synchronous execution
+  // - STREAMING: Method only supports streaming output
+  // - BOTH: Method supports both modes
+  jobworkerp.data.StreamingOutputType output_type = 4;
+
+  // # Tool Annotations (Optional)
+  // MCP-specific metadata for tool behavior hints
+  // Only populated for MCP server tools
+  // NOTE: all properties are **hints** and should not be trusted
+  optional ToolAnnotations annotations = 5;
+}
+
+// # Additional properties describing a Tool to clients.
+//
+// NOTE: all properties in ToolAnnotations are **hints**.
+// They are not guaranteed to provide a faithful description of
+// tool behavior (including descriptive properties like `title`).
+//
+// Clients should never make tool use decisions based on ToolAnnotations
+// received from untrusted servers.
+message ToolAnnotations {
+  // # A human-readable title for the tool.
+  optional string title = 1;
+
+  // If true, the tool does not modify its environment.
+  optional bool read_only_hint = 2;
+
+  // # A human-readable description of the tool's purpose.
+  // If true, the tool may perform destructive updates to its environment.
+  // If false, the tool performs only additive updates.
+  // (This property is meaningful only when `readOnlyHint == false`)
+  // Default: true
+  optional bool destructive_hint = 3;
+
+  // If true, calling the tool repeatedly with the same arguments
+  // will have no additional effect on the its environment.
+  // (This property is meaningful only when `readOnlyHint == false`)
+  optional bool idempotent_hint = 4;
+
+  // If true, this tool may interact with an "open world" of external
+  // entities. If false, the tool's domain of interaction is closed.
+  // For example, the world of a web search tool is open, whereas that
+  // of a memory tool is not.
+  // Default: true
+  optional bool open_world_hint = 5;
+}
+
+// # Worker options
+// Configuration for worker execution (partial jobworkerp.data.WorkerData)
+message WorkerOptions {
+  // # Retry Policy
+  // Configuration for job retry behavior on failure
+  optional jobworkerp.data.RetryPolicy retry_policy = 1;
+  // # Channel Name
+  // Message channel for job (if empty, default channel will be used)
+  optional string channel = 2;
+  // Deprecated: use queue_type instead
+  reserved 3;
+  // # Store Success Flag
+  // If true, job results will be stored in database when execution succeeds
+  bool store_success = 4;
+  // # Store Failure Flag
+  // If true, job results will be stored in database when execution fails
+  bool store_failure = 5;
+  // # Static Execution Flag
+  // If true, keep a fixed number instance of this worker running at a time in
+  // memory
+  bool use_static = 6;
+  // # Output Broadcast Flag
+  // Broadcast job results to all result listeners or not.
+  // If false, cannot use JobResultService/{Listen, ListenStream,
+  // ListenByWorker}.
+  bool broadcast_results = 7;
+  // # Queue Type
+  // Defines how jobs are queued and persisted
+  // Default: NORMAL (in-memory only, fast)
+  optional jobworkerp.data.QueueType queue_type = 8;
+  // # Response Type
+  // Defines how job results should be returned to the client
+  // Default: DIRECT (synchronous execution with result)
+  optional jobworkerp.data.ResponseType response_type = 9;
+}
+
+// # Function Call Options
+// Options for function call execution
+message FunctionCallOptions {
+  // Timeout in milliseconds
+  optional int64 timeout_ms = 1;
+  // Enable streaming output
+  optional bool streaming = 2;
+  // Custom metadata for request context
+  map<string, string> metadata = 3;
+}
+
+// # Function Execution Metadata
+// Contains metadata about function execution
+message FunctionExecutionInfo {
+  // Job ID assigned to this execution
+  string job_id = 1;
+  // Execution start time (Unix timestamp in milliseconds)
+  int64 started_at = 2;
+  // Execution completion time (Unix timestamp in milliseconds)
+  optional int64 completed_at = 3;
+  // Total execution time in milliseconds
+  optional int64 execution_time_ms = 4;
+  // Additional metadata for the execution(trail)
+  map<string, string> metadata = 5;
+}
+
+// # Function Result Data
+// Contains the execution result and metadata of a function call
+message FunctionResult {
+  // # Result Output
+  // Function execution output data (JSON string)
+  string output = 1;
+
+  // # Result Status
+  // Execution status of the function (success, failure, etc.)
+  optional jobworkerp.data.ResultStatus status = 2;
+
+  // # Error Message
+  // Detailed error message when execution fails
+  optional string error_message = 3;
+
+  // # Error Code
+  // Error code for programmatic error handling
+  optional string error_code = 4;
+
+  // # Execution last info
+  // Additional information about the execution in last of stream
+  optional FunctionExecutionInfo last_info = 5;
+}

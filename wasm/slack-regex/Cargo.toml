@@ -1,0 +1,16 @@
+[package]
+name = "slack-regex"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+description = "conductor's Slack handler regex rules (Rust regex crate) for the browser"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# Same version as jobworkerp-conductor, so the browser accepts and matches
+# exactly what conductor does.
+regex = "=1.13.1"
+wasm-abi = { path = "../abi" }

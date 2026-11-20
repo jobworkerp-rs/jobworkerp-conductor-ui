@@ -1,0 +1,6 @@
+# The one place the Rust version is pinned: scripts/build-wasm.sh and the CI
+# rebuild both read it, so they produce the same bytes.
+[toolchain]
+channel = "1.95.0"
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"

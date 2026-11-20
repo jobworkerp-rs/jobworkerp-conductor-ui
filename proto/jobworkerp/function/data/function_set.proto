@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package jobworkerp.function.data;
+
+import "jobworkerp/function/data/function.proto";
+
+message FunctionSetData {
+  string name = 1;
+  string description = 2;
+  int32 category = 3;
+  repeated FunctionUsing targets = 4;
+}
+
+message FunctionSetId { int64 value = 1; }
+
+message FunctionSet {
+  FunctionSetId id = 1;
+  FunctionSetData data = 2;
+}
+
+// FunctionSetData with detailed function specs
+message FunctionSetDetailData {
+  string name = 1;
+  string description = 2;
+  int32 category = 3;
+  repeated FunctionSpecs targets = 4;
+}
+
+// FunctionSet with detailed function information
+message FunctionSetDetail {
+  FunctionSetId id = 1;
+  FunctionSetDetailData data = 2;
+}

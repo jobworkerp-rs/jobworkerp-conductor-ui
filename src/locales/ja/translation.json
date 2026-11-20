@@ -1,0 +1,785 @@
+{
+  "app": {
+    "name": "Conductor UI"
+  },
+  "nav": {
+    "group": "jobworkerp-conductor",
+    "adminUiGroup": "jobworkerp admin-ui",
+    "dashboard": "ダッシュボード",
+    "servers": "サーバー",
+    "schedules": "スケジュール",
+    "resultHandlers": "ジョブ結果ハンドラー",
+    "slackHandlers": "Slack イベント",
+    "executions": "実行状態",
+    "settings": "設定",
+    "opensInNewTab": "{{name}}（新しいタブで開く）",
+    "sidebarTitle": "ナビゲーション",
+    "sidebarDescription": "各画面へのリンク"
+  },
+  "pages": {
+    "dashboard": {
+      "title": "ダッシュボード",
+      "description": "conductor の設定と実行状況、接続先 jobworkerp の概要"
+    },
+    "servers": {
+      "title": "サーバー",
+      "description": "conductor が接続する jobworkerp サーバー"
+    },
+    "schedules": {
+      "title": "スケジュール",
+      "description": "Cron 式で定期実行するワークフロー／ワーカー"
+    },
+    "resultHandlers": {
+      "title": "ジョブ結果ハンドラー",
+      "description": "jobworkerp ワーカーのジョブ結果を監視し、後続処理を実行します"
+    },
+    "slackHandlers": {
+      "title": "Slack イベント",
+      "description": "Slack のメッセージやリアクションをきっかけに処理を実行します"
+    },
+    "executions": {
+      "title": "実行状態",
+      "description": "各設定から起動された実行の状態と履歴"
+    },
+    "executionDetail": {
+      "title": "実行の詳細",
+      "description": "実行 {{id}} の状態と記録"
+    },
+    "settings": {
+      "title": "設定",
+      "description": "接続情報の確認、設定の入出力、表示設定"
+    },
+    "notFound": {
+      "title": "ページが見つかりません",
+      "description": "指定されたページは存在しません。",
+      "backToDashboard": "ダッシュボードへ戻る"
+    },
+    "comingSoon": "この画面は準備中です。"
+  },
+  "header": {
+    "toggleSidebar": "サイドバーを開閉",
+    "autoRefresh": "自動更新",
+    "theme": "テーマを切り替え",
+    "languagePrefix": "言語を切り替え: ",
+    "themes": {
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システムに従う"
+    }
+  },
+  "languages": {
+    "ja": "日本語",
+    "en": "English"
+  },
+  "connection": {
+    "connected": "conductor API に接続中",
+    "checking": "conductor API に接続しています…",
+    "disconnected": "conductor API に接続できません",
+    "bannerTitle": "conductor API に接続できません",
+    "bannerDescription": "{{url}} から応答がありません。conductor が gRPC-Web を有効にして起動しているか、ランタイム設定の URL が正しいかを確認してください。"
+  },
+  "config": {
+    "invalidTitle": "ランタイム設定に誤りがあります",
+    "invalidDescription": "コンテナの環境変数（CONDUCTOR_UI_*）または config.js を修正してください。",
+    "fields": {
+      "conductorUrl": "conductor API の URL",
+      "jobworkerpServers": "jobworkerp サーバーの対応付け",
+      "cronTimezone": "Cron のタイムゾーン",
+      "defaultLanguage": "既定の言語",
+      "defaultTheme": "既定のテーマ"
+    },
+    "errors": {
+      "invalid_url": "{{field}}: http または https の URL を指定してください",
+      "invalid_json": "{{field}}: JSON として解釈できません",
+      "invalid_servers": "{{field}}: name を持つオブジェクトの配列を指定してください",
+      "duplicate_server": "{{field}}: サーバー名「{{detail}}」が重複しています",
+      "invalid_timezone": "{{field}}: IANA のタイムゾーン名ではありません",
+      "invalid_language": "{{field}}: ja または en を指定してください",
+      "invalid_theme": "{{field}}: light、dark、system のいずれかを指定してください"
+    },
+    "serverDetail": "（サーバー「{{detail}}」）"
+  },
+  "errors": {
+    "network": "サーバーに接続できませんでした",
+    "http": "接続先が gRPC-Web として応答しませんでした（HTTP {{status}}）",
+    "aborted": "処理が中断されました",
+    "unknown": "予期しないエラーが発生しました",
+    "details": "詳細",
+    "status": {
+      "cancelled": "処理がキャンセルされました",
+      "unknown": "サーバーで不明なエラーが発生しました",
+      "invalid_argument": "入力内容に誤りがあります",
+      "deadline_exceeded": "サーバーの応答が時間内に返りませんでした",
+      "not_found": "対象が見つかりません",
+      "already_exists": "同名の設定が既にあります",
+      "permission_denied": "この操作は許可されていません",
+      "resource_exhausted": "サーバーの資源が不足しています",
+      "failed_precondition": "現在の状態では実行できません",
+      "aborted": "処理が競合したため中断されました",
+      "out_of_range": "値が範囲外です",
+      "unimplemented": "この操作に対応していません。conductor の版が古い可能性があります",
+      "internal": "サーバーで処理できませんでした",
+      "unavailable": "サーバーが一時的に処理できない状態です",
+      "data_loss": "データが失われた可能性があります",
+      "unauthenticated": "認証が必要です",
+      "default": "サーバーでエラーが発生しました"
+    }
+  },
+  "common": {
+    "cancel": "キャンセル",
+    "confirm": "OK",
+    "close": "閉じる",
+    "previous": "前へ",
+    "next": "次へ",
+    "loading": "読み込み中…",
+    "empty": "表示する項目がありません",
+    "items_other": "{{count}} 件",
+    "pageRange": "{{total}} 件中 {{from}}–{{to}} 件",
+    "enabled": "有効",
+    "toggleEnabled": "{{name}} の有効／無効を切り替え",
+    "typeToConfirm": "確認のため {{text}} と入力してください",
+    "create": "作成",
+    "edit": "編集",
+    "delete": "削除",
+    "save": "保存",
+    "saving": "保存中…",
+    "disabled": "無効",
+    "actions": "操作",
+    "retry": "再試行",
+    "notSet": "未設定",
+    "listScaleWarning": "{{count}} 件あります。{{limit}} 件を超える一覧は表示が遅くなることがあります。",
+    "editItem": "{{name}} を編集",
+    "deleteItem": "{{name}} を削除",
+    "back": "戻る",
+    "formErrors": {
+      "required": "入力してください",
+      "tooLong": "長すぎます（{{max}} 文字以内）"
+    },
+    "historyItem": "{{name}} の実行履歴",
+    "unknownServer": "（サーバー {{id}} が見つかりません）",
+    "deleted": "削除しました",
+    "duplicateName": "この名前は既に使われています。保存すると失敗します。",
+    "filters": {
+      "search": "名前で検索",
+      "status": "状態",
+      "allStatuses": "すべての状態"
+    },
+    "pageRangeOpen": "{{from}}–{{to}} 件"
+  },
+  "references": {
+    "kind": {
+      "schedule": "スケジュール",
+      "slackHandler": "Slack イベント",
+      "resultHandler": "ジョブ結果ハンドラー"
+    },
+    "roles": {
+      "target": "実行先",
+      "listen": "監視元",
+      "process": "実行先（ジョブ結果）"
+    },
+    "more_other": "ほか {{count}} 件",
+    "kindGroups": {
+      "schedule": "スケジュール",
+      "slackHandler": "Slack イベント",
+      "resultHandler": "ジョブ結果ハンドラー"
+    }
+  },
+  "servers": {
+    "columns": {
+      "name": "名前",
+      "endpoint": "接続先（conductor から）",
+      "status": "状態",
+      "reachability": "jobworkerp 到達",
+      "references": "利用中の設定",
+      "updatedAt": "更新日時"
+    },
+    "reach": {
+      "reachable": "到達可",
+      "unreachable": "到達不可",
+      "checking": "確認中…",
+      "notConfigured": "連携未設定"
+    },
+    "sslTitle": "SSL/TLS",
+    "notFound": "サーバー {{id}} が見つかりません。削除された可能性があります。",
+    "detail": {
+      "basic": "基本情報",
+      "endpoint": "接続先",
+      "ssl": "SSL",
+      "sslOn": "あり",
+      "sslOff": "なし",
+      "status": "状態",
+      "grpcWebUrl": "ブラウザ向け gRPC-Web",
+      "adminUiUrl": "admin-ui",
+      "fromRuntimeConfig": "（ランタイム設定）",
+      "createdAt": "作成日時",
+      "updatedAt": "更新日時",
+      "openAdminUi": "admin-ui を開く",
+      "jobworkerpTitle": "jobworkerp の状態",
+      "jobworkerpDescription": "ブラウザから gRPC-Web で取得",
+      "notConfigured": "ランタイム設定（CONDUCTOR_UI_JOBWORKERP_SERVERS）にこのサーバーのブラウザ向け URL がないため、jobworkerp の状態を表示できません。",
+      "channels": "チャネル別ワーカー数",
+      "defaultChannel": "（既定）",
+      "adminWorkers": "ワーカー一覧",
+      "adminJobs": "ジョブ一覧",
+      "adminResults": "実行結果",
+      "referencesTitle": "このサーバーを参照している設定",
+      "referencesDescription": "削除する前に、これらの設定の移行先を検討してください",
+      "referencesEmpty": "このサーバーを参照している設定はありません。",
+      "kind": "種別",
+      "role": "参照の仕方"
+    },
+    "form": {
+      "createTitle": "サーバーを作成",
+      "createDescription": "conductor から接続する jobworkerp サーバーを登録します",
+      "editTitle": "サーバーを編集",
+      "editDescription": "conductor から {{name}} への接続設定を変更します",
+      "name": "名前",
+      "nameHelp": "一意な名前（{{max}} 文字以内）",
+      "host": "ホスト",
+      "hostHelp": "conductor から到達できるホスト名または IP アドレス。IPv6 は [::1] のように角かっこで囲む",
+      "port": "ポート",
+      "ssl": "SSL/TLS を使う",
+      "description": "説明",
+      "enabled": "有効",
+      "browserUrlNote": "ブラウザから jobworkerp を参照する URL（gRPC-Web、admin-ui）は、この画面ではなくランタイム設定で与えます。",
+      "duplicateName": "この名前は別のサーバーで使われています。保存すると失敗します。",
+      "created": "サーバーを作成しました",
+      "saved": "サーバーを保存しました",
+      "errors": {
+        "invalidHost": "スキーム・ポート・パスを含めず、ホスト名または IP アドレスを入力してください",
+        "portRange": "1〜65535 の整数を入力してください"
+      }
+    },
+    "delete": {
+      "title": "{{name}} を削除しますか？",
+      "description": "この操作は取り消せません。",
+      "referencedDescription_other": "このサーバーは {{count}} 件の設定から参照されています。削除すると、これらの設定は実行できなくなります。",
+      "confirmAnyway": "それでも削除",
+      "deleted": "サーバーを削除しました",
+      "checking": "このサーバーを参照している設定を確認しています…"
+    },
+    "stats": {
+      "workers": "ワーカー数",
+      "running": "実行中",
+      "pending": "待機中"
+    }
+  },
+  "executionTarget": {
+    "legend": "実行対象",
+    "server": "実行先サーバー",
+    "serverHelp": "実行する jobworkerp サーバー",
+    "serverPlaceholder": "サーバーを選択",
+    "serverDisabled": "{{name}}（無効）",
+    "method": "実行方式",
+    "methods": {
+      "worker": {
+        "label": "登録済みワーカー",
+        "description": "jobworkerp に登録済みのワーカーを実行する（ランナーの種類は問わない）"
+      },
+      "workflowUrl": {
+        "label": "ワークフロー（URL／パス）",
+        "description": "URL または conductor から読めるパスにあるワークフロー定義を実行する"
+      },
+      "workflowInline": {
+        "label": "ワークフロー（定義を記述）",
+        "description": "ここで記述した定義を jobworkerp に保存して実行する"
+      }
+    },
+    "inlineUnavailableReason": "このサーバーの jobworkerp へのブラウザ向け URL がランタイム設定（CONDUCTOR_UI_JOBWORKERP_SERVERS）にないため、選べません。",
+    "workerName": "ワーカー名",
+    "workerNameHelp": "サーバーのワーカーから選ぶか、名前を入力する",
+    "workerNotFound": "この名前のワーカーはサーバーにありません。",
+    "workerRunner": "ランナー: {{runner}}",
+    "openWorker": "admin-ui で開く",
+    "using": "メソッド（using）",
+    "usingHelp": "複数のメソッドを持つランナーの場合に指定する",
+    "usingCandidates": "メソッド: {{methods}}",
+    "workflowUrl": "ワークフロー URL",
+    "workflowUrlHelp": "URL または conductor から読めるパス",
+    "workflowUrlHelpSlack": "http://、https://、file:// のいずれかで始め、\"..\" を含まず、{{max}} 文字以内",
+    "channel": "チャネル",
+    "channelHelp": "jobworkerp のジョブチャネル。空なら既定のチャネル",
+    "channelHelpInline": "定義を保存するワーカーのチャネルとして保存する。空なら既定のチャネル",
+    "definition": {
+      "label": "ワークフロー定義",
+      "errors": {
+        "syntax": "{{line}} 行 {{column}} 列で構文エラー",
+        "notObject": "定義はマッピング（YAML）またはオブジェクト（JSON）にしてください"
+      }
+    },
+    "definitionHelp": "YAML または JSON。ここでは構文だけを確かめ、ワークフローとしての検査は実行時に jobworkerp が行う。",
+    "insertTemplate": "雛形を挿入",
+    "managedWorkerName": "保存先ワーカー名",
+    "managedWorkerNameHelp": "定義を jobworkerp に保存するワーカーの名前",
+    "managedWorkerMissing": "この定義を保存したワーカーが jobworkerp に見つかりません。保存すると作り直します。",
+    "args": {
+      "label": "引数",
+      "errors": {
+        "invalidJson": "JSON として正しくありません",
+        "tooLarge": "大きすぎます（{{kb}} KB まで）",
+        "slackObject": "JSON オブジェクトにしてください。Slack イベントでは、それ以外の値を conductor が捨てます",
+        "slackEvent": "最上位に \"slack_event\" を置かないでください。conductor が Slack のイベント内容をそこに入れます"
+      }
+    },
+    "argsHelp": "JSON。{{kb}} KB まで",
+    "formatArgs": "整形",
+    "argsReserved": "{{names}} は WORKFLOW ランナー自身の引数と同じ名前です。この場合 conductor は引数をワークフローの入力として包まずにそのまま渡すため、URL 指定と動きが変わります。",
+    "shapeTitle": "実際に渡される形",
+    "shape": {
+      "schedule": "引数がそのまま渡される。",
+      "slackHandler": "引数に Slack のイベント内容（\"slack_event\"）を加えたものが渡される。",
+      "resultHandler": "監視したジョブの結果（\"result\"）と引数（\"args\"）をまとめたオブジェクトが渡される。",
+      "workflow": "ワークフローの場合は、これがワークフローの入力になる。"
+    },
+    "errors": {
+      "workerNameSyntax": "英字で始め、英数字・-・_ だけを使ってください",
+      "nameTaken": "{{name}} という名前のワーカーが既にあり、この画面の管理対象ではありません。別の名前にしてください。",
+      "rollbackFailed": "保存に失敗し、jobworkerp のワーカー {{name}} を元に戻せませんでした。admin-ui で確認してください。",
+      "inlineUnavailable": "この方式には、ランタイム設定にこのサーバーの jobworkerp へのブラウザ向け URL が必要です。",
+      "noWorkflowRunner": "この jobworkerp には WORKFLOW ランナーがありません。",
+      "slackWorkflowUrl": "http://、https://、file:// のいずれかで始め、\"..\" を使わず、{{max}} 文字以内にしてください"
+    }
+  },
+  "settings": {
+    "delete": {
+      "title": "{{name}} を削除しますか？",
+      "description": "この操作は取り消せません。",
+      "alsoDeleteWorker": "ワークフロー定義を保存しているワーカー {{worker}} も jobworkerp から削除する",
+      "cleanupFailed": "ワーカー {{worker}} を jobworkerp から削除できませんでした"
+    },
+    "deleteObsoleteWorker": "この保存で使われなくなる {{server}} のワーカー {{worker}} を削除する",
+    "targetSummary": {
+      "worker": "ワーカー: {{name}}",
+      "workflowUrl": "ワークフロー: {{url}}",
+      "workflowInline": "記述したワークフロー（ワーカー {{name}}）"
+    },
+    "form": {
+      "name": "名前",
+      "nameHelp": "一意な名前（{{max}} 文字以内）",
+      "description": "説明",
+      "enabled": "有効"
+    }
+  },
+  "resultHandlers": {
+    "columns": {
+      "name": "名前",
+      "listen": "監視対象",
+      "process": "実行先",
+      "status": "状態"
+    },
+    "form": {
+      "createTitle": "ジョブ結果ハンドラーを作成",
+      "createDescription": "jobworkerp のワーカーの結果をきっかけに後続を実行します",
+      "editTitle": "ジョブ結果ハンドラーを編集",
+      "editDescription": "{{name}} の監視対象と後続の実行を変更します",
+      "listenServer": "監視サーバー",
+      "listenServerHelp": "監視するワーカーのある jobworkerp サーバー",
+      "listenWorker": "監視ワーカー",
+      "listenWorkerHelp": "サーバーのワーカーから選ぶか、名前を入力する",
+      "notBroadcasting": "このワーカーは結果を配信しない設定のため、conductor は結果を受け取れません。admin-ui でワーカーの「結果を配信する」を有効にしてください。",
+      "listenWorkerMissing": "この名前のワーカーはサーバーにありません。",
+      "conditionsTitle": "後続が実行される条件",
+      "conditionBroadcast": "監視ワーカーが結果を配信する設定であること。",
+      "conditionSuccess": "監視したジョブが成功し、出力が空でないこと。",
+      "created": "ジョブ結果ハンドラーを作成しました",
+      "saved": "ジョブ結果ハンドラーを保存しました"
+    },
+    "notFound": "ジョブ結果ハンドラー {{id}} が見つかりません。削除された可能性があります。"
+  },
+  "slackHandlers": {
+    "columns": {
+      "name": "名前",
+      "kind": "種別",
+      "conditions": "条件",
+      "server": "実行先",
+      "status": "状態"
+    },
+    "kinds": {
+      "message": "メッセージ",
+      "reaction": "リアクション"
+    },
+    "summary": "全 {{total}} 件（メッセージ {{messages}}・リアクション {{reactions}}）・有効 {{enabled}} 件・監視チャネル {{channels}}",
+    "filters": {
+      "kind": "種別",
+      "allKinds": "すべての種別",
+      "channel": "チャネル",
+      "allChannels": "すべてのチャネル"
+    },
+    "conditions": {
+      "allChannels": "全チャネル",
+      "channel": "チャネル {{id}}",
+      "pattern": "本文が {{pattern}} に一致",
+      "mention": "メンション必須",
+      "reactions": "リアクション {{names}}",
+      "anyReaction": "全リアクション",
+      "userFilter": "ユーザーが {{filter}} に一致",
+      "operations": {
+        "added": "追加",
+        "removed": "削除",
+        "both": "追加・削除"
+      }
+    },
+    "form": {
+      "createTitle": "Slack イベントを作成",
+      "createDescription": "Slack のメッセージやリアクションをきっかけに処理を実行します",
+      "editTitle": "Slack イベントを編集",
+      "editDescription": "{{name}} の条件と実行内容を変更します",
+      "kind": "種別",
+      "channelId": "Slack チャネル ID",
+      "channelIdHelp": "C または G で始まる ID。空なら全チャネル",
+      "messagePattern": "メッセージパターン",
+      "patternHelp": "conductor の正規表現の構文（Rust の regex）。{{max}} バイトまで",
+      "mentionRequired": "メンションされたときだけ",
+      "messageConditionHelp": "パターンとメンション必須の少なくとも一方を指定してください。",
+      "reactionNames": "リアクション",
+      "reactionNamesHelp": "名前を入力して Enter で追加。\":\" は除かれる。空なら全リアクション",
+      "addReaction": "追加",
+      "removeReaction": "{{name}} を外す",
+      "reactionOperation": "リアクションの操作",
+      "operations": {
+        "added": "追加",
+        "removed": "削除",
+        "both": "追加・削除の両方"
+      },
+      "reactionUserFilter": "リアクションしたユーザー",
+      "reactionUserFilterHelp": "ユーザー ID のパターン（Rust の regex）。空なら全ユーザー",
+      "sample": "文字列で試す",
+      "sampleResultMatch": "一致します",
+      "sampleResultNoMatch": "一致しません",
+      "regexUnavailable": "パターンは保存時に conductor が検査します。",
+      "createdEnabled": "新しいハンドラーは常に有効の状態で作られます。無効にするには、作成後に一覧から切り替えてください。",
+      "created": "Slack イベントを作成しました",
+      "saved": "Slack イベントを保存しました",
+      "errors": {
+        "needCondition": "パターンを入力するか、「メンションされたときだけ」を有効にしてください",
+        "regex": "conductor が使えないパターンです",
+        "patternTooLong": "長すぎます（{{max}} バイトまで）",
+        "tooManyReactions": "リアクションは {{max}} 個までです",
+        "invalidReaction": "「{{name}}」はリアクション名として使えません（文字・数字・_・-・+ で 100 バイトまで）",
+        "channelId": "C または G で始まる Slack チャネル ID を入力してください"
+      }
+    },
+    "notFound": "Slack イベント {{id}} が見つかりません。削除された可能性があります。"
+  },
+  "schedules": {
+    "columns": {
+      "name": "名前",
+      "crontab": "Cron 式",
+      "nextRun": "次回実行",
+      "server": "実行先",
+      "status": "状態"
+    },
+    "summary": "全 {{total}} 件・有効 {{enabled}} 件",
+    "nextRunSummary": "直近の実行予定: {{time}}（{{name}}）",
+    "noNextRun": "実行予定はありません",
+    "timeZoneNote": "実行予定は Cron のタイムゾーン {{zone}} で表示しています。",
+    "filters": {
+      "server": "実行先",
+      "allServers": "すべての実行先"
+    },
+    "runNow": "{{name}} を今すぐ実行",
+    "cron": {
+      "label": "Cron 式",
+      "help": "秒 分 時 日 月 曜日（年は省略可）。@daily などの別名も使えます",
+      "presets": "プリセット",
+      "preset": {
+        "everyMinute": "毎分",
+        "hourly": "毎時 0 分",
+        "daily": "毎日 9:00",
+        "weekdays": "平日 9:00",
+        "weekly": "毎週月曜 9:00",
+        "monthly": "毎月 1 日 0:00"
+      },
+      "empty": "Cron 式を入力すると、説明と実行予定を表示します。",
+      "secondsAdded": "5 フィールドの式です。先頭に秒 0 を補い「{{expression}}」として保存します。",
+      "bothDays": "日と曜日を両方指定しています。conductor は両方を満たす日（AND）にだけ実行します。一般的な cron（どちらかを満たす日に実行）とは異なります。",
+      "nextRuns": "次回以降の実行予定（{{zone}}）",
+      "invalid": "conductor はこの式で実行できません: {{detail}}",
+      "noRun": "この式では実行時刻が見つかりません: {{detail}}",
+      "timeZoneUnset": "Cron のタイムゾーンが設定されていないため、UTC で計算しています。conductor の設定（CONDUCTOR_CRON_TIMEZONE）と異なる可能性があります。",
+      "daylightSaving": "{{zone}} には夏時間があります。conductor はスケジュールを登録した時点の UTC との時差で計算し続けるため、切り替え後は実際の実行時刻がここに表示した予定とずれることがあります。",
+      "loading": "conductor の Cron の規則を読み込んでいます…",
+      "unavailable": "conductor の Cron の規則を読み込めないため、式を検査できません。読み込めるまで保存できません。",
+      "timeZoneRejected": "conductor はタイムゾーン「{{name}}」を解釈できないため、UTC で実行します。実行予定も UTC で計算しています。"
+    },
+    "form": {
+      "createTitle": "スケジュールを作成",
+      "createDescription": "Cron 式で定期的に処理を実行します",
+      "editTitle": "スケジュールを編集",
+      "editDescription": "{{name}} の実行時刻と実行内容を変更します",
+      "jobTimeout": "ジョブタイムアウト（秒）",
+      "jobTimeoutHelp": "空欄なら conductor の既定値（{{default}} 秒）、0 は無制限。結果をストリーミングで返すランナーでは、総実行時間ではなく出力が途切れている時間の上限として働きます。",
+      "created": "スケジュールを作成しました",
+      "saved": "スケジュールを保存しました",
+      "errors": {
+        "crontab": "conductor が使えない Cron 式です",
+        "cronUnavailable": "Cron 式を検査できないため保存できません",
+        "jobTimeout": "0 から {{max}} までの整数で入力してください"
+      }
+    },
+    "notFound": "スケジュール {{id}} が見つかりません。削除された可能性があります。",
+    "run": {
+      "title": "{{name}} を今すぐ実行しますか？",
+      "description": "設定した実行対象を 1 回実行します。",
+      "confirm": "実行",
+      "target": "実行対象",
+      "server": "実行先",
+      "args": "送る引数",
+      "noArgs": "（なし）",
+      "scheduleDisabled": "このスケジュールは無効ですが、手動では実行できます。",
+      "serverDisabled": "実行先のサーバー {{name}} は無効ですが、手動では実行できます。",
+      "override": "この実行に限り引数を置き換える",
+      "overrideLabel": "置き換える引数",
+      "overrideHelp": "設定の引数とはマージせず、全体を置き換えます。JSON。{{kb}} KB まで"
+    },
+    "nextRun": {
+      "refused": "conductor が実行できない式です",
+      "noRun": "実行時刻が見つかりません",
+      "unknown": "不明",
+      "unavailable": "conductor の Cron の規則を読み込めないため、次回実行を表示できません。"
+    }
+  },
+  "executions": {
+    "status": {
+      "unspecified": "不明",
+      "pending": "待機中",
+      "running": "実行中",
+      "waitResult": "結果待ち",
+      "cancelling": "取り消し中",
+      "succeeded": "成功",
+      "failed": "失敗",
+      "cancelled": "取り消し済み",
+      "unknown": "不明",
+      "unavailable": "取得できません",
+      "enqueueFailed": "受付失敗"
+    },
+    "sourceKinds": {
+      "schedule": "スケジュール",
+      "slackHandler": "Slack イベント",
+      "resultHandler": "ジョブ結果ハンドラー"
+    },
+    "columns": {
+      "status": "状態",
+      "source": "起動元",
+      "jobId": "ジョブ ID",
+      "server": "実行先",
+      "triggeredAt": "起動日時",
+      "duration": "所要時間",
+      "latest": "最新実行"
+    },
+    "filters": {
+      "sourceType": "起動元の種別",
+      "allSourceTypes": "すべての起動元",
+      "server": "実行先",
+      "allServers": "すべての実行先",
+      "period": "期間",
+      "periods": {
+        "all": "全期間",
+        "1h": "直近 1 時間",
+        "24h": "直近 24 時間",
+        "7d": "直近 7 日",
+        "custom": "期間を指定"
+      },
+      "from": "開始",
+      "to": "終了",
+      "status": "状態",
+      "allStatuses": "すべての状態",
+      "statusPageOnly": "状態の絞り込みは、表示中のページの実行だけが対象です。",
+      "source": "起動元: {{name}}（{{kind}}）",
+      "clearSource": "起動元の絞り込みを解除",
+      "sourceLimits": "起動元で絞り込んでいる間は、期間と実行先では絞り込めず、全件数も表示できません。"
+    },
+    "reasons": {
+      "notCancellable": "待機中・実行中・結果待ちの実行だけキャンセルできます",
+      "noJobId": "ジョブ ID が確定していないため、まだキャンセルできません",
+      "notSchedule": "再実行できるのはスケジュールの実行だけです",
+      "notFinished": "終了した実行（成功・失敗・キャンセル済み・受付失敗）だけ削除できます"
+    },
+    "actions": {
+      "menu": "実行 {{id}} の操作",
+      "details": "詳細",
+      "cancel": "キャンセル",
+      "reExecute": "再実行",
+      "openSetting": "設定を開く",
+      "delete": "削除"
+    },
+    "cancel": {
+      "title": "実行 {{id}} をキャンセルしますか？",
+      "description": "jobworkerp にジョブ {{jobId}} の取り消しを依頼します。",
+      "confirm": "キャンセルする",
+      "done": "キャンセルを依頼しました",
+      "nothing": "取り消すジョブがありませんでした。既に終了している可能性があります。"
+    },
+    "reExecute": {
+      "title": "{{name}} を再実行しますか？",
+      "description": "元の実行の引数ではなく、スケジュールの現在の設定で実行します。",
+      "confirm": "再実行"
+    },
+    "delete": {
+      "title": "実行 {{id}} を削除しますか？",
+      "description": "conductor の実行の記録を削除します。jobworkerp のジョブ結果は削除されません。",
+      "alreadyGone": "既に削除されていました"
+    },
+    "deleteBySource": {
+      "button": "この起動元の履歴をまとめて削除",
+      "title": "{{name}} の実行履歴をまとめて削除しますか？",
+      "description": "終了した実行の記録を削除します。",
+      "includeActive": "終了していない実行も含める（進行中の実行の記録も消え、状態を追えなくなります）",
+      "done_other": "{{count}} 件の実行を削除しました"
+    },
+    "trigger": {
+      "accepted": "{{name}} の実行を受け付けました",
+      "acceptedStatus": "状態: {{status}}",
+      "enqueueFailed": "{{name}} の実行を受け付けられませんでした",
+      "viewExecution": "実行の詳細を見る"
+    },
+    "statusSources": {
+      "unspecified": "不明",
+      "jobProcessingStatus": "jobworkerp の処理状態",
+      "jobResult": "jobworkerp のジョブ結果",
+      "executionRef": "conductor の記録",
+      "unavailable": "取得できません"
+    },
+    "detail": {
+      "status": "状態",
+      "statusSource": "観測元",
+      "observedAt": "観測時刻",
+      "statusDetail": "状態の補足",
+      "source": "起動元",
+      "server": "実行先",
+      "jobId": "ジョブ ID",
+      "triggeredAt": "起動日時",
+      "createdAt": "記録日時",
+      "resultStatus": "終了時の結果",
+      "enqueueError": "受付失敗の内容",
+      "context": "起動時のコンテキスト",
+      "copy": "コピー",
+      "copied": "コピーしました",
+      "jobResult": "ジョブ結果",
+      "jobStatus": "結果ステータス",
+      "startedAt": "開始",
+      "endedAt": "終了",
+      "duration": "所要時間",
+      "output": "出力",
+      "outputTruncated": "先頭 {{bytes}} バイトを表示しています",
+      "noResult": "jobworkerp にジョブ結果がありません。結果を保存しない設定か、まだ終了していません。",
+      "notLinked": "jobworkerp 連携が設定されていないため、ジョブ結果は表示できません。",
+      "notFinished": "ジョブ結果は終了後に表示します。",
+      "openJob": "admin-ui でジョブを開く",
+      "openResult": "admin-ui で結果を開く",
+      "notFound": "実行 {{id}} が見つかりません。削除された可能性があります。",
+      "sourceGone": "（削除済みの設定）"
+    }
+  },
+  "dashboard": {
+    "cards": {
+      "schedules": "スケジュール",
+      "slackHandlers": "Slack イベント",
+      "resultHandlers": "ジョブ結果ハンドラー",
+      "servers": "jobworkerp サーバー",
+      "enabled": "有効 {{enabled}} / 全 {{total}}",
+      "reachable": "到達可 {{reachable}} / 連携 {{linked}}"
+    },
+    "recent": {
+      "title": "最近の実行",
+      "description": "直近 24 時間の新しい実行 {{count}} 件のうち、実行中と失敗したもの",
+      "none": "実行中・失敗した実行はありません",
+      "all": "実行状態を見る"
+    },
+    "nextRuns": {
+      "title": "次回実行予定",
+      "description": "有効なスケジュールの近い順（{{zone}}）",
+      "none": "実行予定のスケジュールはありません"
+    },
+    "servers": {
+      "title": "jobworkerp サーバー",
+      "references": "スケジュール {{schedule}}・Slack イベント {{slackHandler}}・ジョブ結果ハンドラー {{resultHandler}}",
+      "openAdminUi": "admin-ui を開く",
+      "none": "サーバーが登録されていません"
+    }
+  },
+  "settingsPage": {
+    "connections": {
+      "title": "接続情報",
+      "description": "ランタイム設定から読み込んだ接続先です。変更するには、コンテナの環境変数（CONDUCTOR_UI_*）か config.js を書き換えて、画面を再読み込みしてください。",
+      "conductorUrl": "conductor 管理 API",
+      "cronTimeZone": "Cron の解釈タイムゾーン",
+      "servers": "jobworkerp の接続先",
+      "noServers": "jobworkerp の接続先が設定されていません（CONDUCTOR_UI_JOBWORKERP_SERVERS）。",
+      "columns": {
+        "name": "サーバー",
+        "grpcWebUrl": "gRPC-Web URL",
+        "adminUiUrl": "admin-ui URL",
+        "reachability": "状態"
+      }
+    },
+    "display": {
+      "title": "表示設定",
+      "description": "このブラウザに保存されます。",
+      "language": "言語",
+      "followBrowser": "ブラウザに従う",
+      "theme": "テーマ",
+      "interval": "自動更新の間隔",
+      "intervalHelp": "実行中の項目がある間は 5 秒ごとに更新します。自動更新はヘッダーのスイッチで止められます。",
+      "seconds": "{{seconds}} 秒ごと"
+    },
+    "export": {
+      "title": "エクスポート",
+      "description": "全設定（サーバー、スケジュール、Slack イベント、ジョブ結果ハンドラー）を、説明と有効状態も含めて 1 つの TOML ファイルとしてダウンロードします。",
+      "scope": "対象",
+      "scopeAll": "全件",
+      "scopeEnabled": "有効なもののみ",
+      "enabledHelp": "書き出す設定が使うサーバーは、無効でも含めます。そのまま取り込めるようにするためです。",
+      "download": "TOML をダウンロード",
+      "failed": "エクスポートに失敗しました: {{message}}",
+      "managedNotice": "次の設定は、ワークフローの定義を jobworkerp のワーカーに保存しています。TOML にはワーカー名だけが入るため、ワーカーは admin-ui などで別にバックアップしてください。",
+      "unverified": "（このブラウザからは確認できません）",
+      "leftOut_one": "{{count}} 件の設定をファイルに含めませんでした。使っているサーバーが削除されています",
+      "leftOut_other": "{{count}} 件の設定をファイルに含めませんでした。使っているサーバーが削除されています"
+    },
+    "import": {
+      "title": "インポート",
+      "description": "TOML ファイルを検証してから取り込みます。取り込めない項目が 1 つでもあれば、何も書き込みません。",
+      "file": "TOML ファイル",
+      "toml": "TOML",
+      "tomlHelp": "ファイルを選ぶか、ここにドロップするか、内容を貼り付けてください。",
+      "overwrite": "既存の設定を上書きする",
+      "overwriteHelp": "上書きは、既存の設定をすべて削除してから取り込みます。実行履歴は残ります。",
+      "newIds": "取り込んだ設定には新しい ID が付くため、それまでの実行履歴とはつながらなくなります。",
+      "reuseServers": "名前とアドレスが同じサーバーは既存のものを使います。それ以外で名前が既にあるものはエラーになります。",
+      "validate": "検証",
+      "import": "取り込み",
+      "changed": "内容か上書きの選択が変わりました。もう一度検証してください。",
+      "valid": "取り込めます:",
+      "invalid_one": "取り込めない項目が {{count}} 件あります。何も書き込みません:",
+      "invalid_other": "取り込めない項目が {{count}} 件あります。何も書き込みません:",
+      "counts": {
+        "servers_one": "サーバー {{count}} 件",
+        "servers_other": "サーバー {{count}} 件",
+        "schedules_one": "スケジュール {{count}} 件",
+        "schedules_other": "スケジュール {{count}} 件",
+        "slackHandlers_one": "Slack イベント {{count}} 件",
+        "slackHandlers_other": "Slack イベント {{count}} 件",
+        "resultHandlers_one": "ジョブ結果ハンドラー {{count}} 件",
+        "resultHandlers_other": "ジョブ結果ハンドラー {{count}} 件"
+      },
+      "confirmTitle": "すべての設定を上書きしますか？",
+      "done": "サーバー {{servers}} 件、スケジュール {{schedules}} 件、Slack イベント {{slackHandlers}} 件、ジョブ結果ハンドラー {{resultHandlers}} 件を取り込みました"
+    },
+    "clear": {
+      "title": "危険な操作",
+      "description": "全設定の削除は元に戻せません。先にエクスポートしてください。",
+      "exportFirst": "先に全設定をエクスポート",
+      "button": "全設定を削除",
+      "dialogTitle": "全設定を削除しますか？",
+      "dialogDescription": "サーバー、スケジュール、Slack イベント、ジョブ結果ハンドラーをすべて削除します。元に戻せません。",
+      "historyKept": "実行履歴は削除されません。",
+      "deleteWorkers_one": "管理ワーカー {{count}} 件（定義を記述したワークフロー）も削除する",
+      "deleteWorkers_other": "管理ワーカー {{count}} 件（定義を記述したワークフロー）も削除する",
+      "unverified_one": "{{count}} 件の設定が、管理ワーカーらしい名前のワーカーを使っていますが、このブラウザからは確認できません。必要なら admin-ui で削除してください。",
+      "unverified_other": "{{count}} 件の設定が、管理ワーカーらしい名前のワーカーを使っていますが、このブラウザからは確認できません。必要なら admin-ui で削除してください。",
+      "done": "全設定を削除しました",
+      "workersFailed": "削除できなかった管理ワーカーがあります"
+    }
+  }
+}
