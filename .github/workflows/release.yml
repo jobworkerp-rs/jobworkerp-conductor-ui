@@ -78,6 +78,8 @@ jobs:
         with:
           name: archive
           path: .release/jobworkerp-conductor-ui-v*.tar.gz
+          # .release/ is a dot directory, which upload-artifact skips by default.
+          include-hidden-files: true
           if-no-files-found: error
           compression-level: 0
 

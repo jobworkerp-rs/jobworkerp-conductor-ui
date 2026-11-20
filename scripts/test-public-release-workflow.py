@@ -100,6 +100,15 @@ def check_common(wf_name, wf):
             uses = step.get("uses")
             if uses and not PINNED_USES.match(uses):
                 fail(f"{wf_name}:{name}: action not pinned to a commit SHA: {uses}")
+        # upload-artifact skips dot paths unless told otherwise, and then
+        # finds "no files" for the release archive under .release/.
+        for upload in uses_of(job, "actions/upload-artifact"):
+            options = upload.get("with") or {}
+            hidden = any(part.startswith(".") and part not in {".", ".."}
+                         for line in str(options.get("path", "")).splitlines()
+                         for part in line.strip().split("/"))
+            if hidden and options.get("include-hidden-files") is not True:
+                fail(f"{wf_name}:{name}: uploading a dot path needs include-hidden-files: true")
         for checkout in uses_of(job, "actions/checkout"):
             if (checkout.get("with") or {}).get("persist-credentials") is not False:
                 fail(f"{wf_name}:{name}: checkout must set persist-credentials: false")
@@ -249,6 +258,9 @@ MUTATIONS = {
     "template expansion in a script": lambda wf: step_running(wf, "build", BUILD_SCRIPT).update(
         {"run": "bash scripts/build-release.sh ${{ github.ref_name }}"}
     ),
+    "hidden archive not uploaded": lambda wf: step_using(wf, "build", "actions/upload-artifact")[
+        "with"
+    ].pop("include-hidden-files"),
     "unlocked install": lambda wf: step_running(wf, "build", "pnpm install").update(
         {"run": "pnpm install"}
     ),

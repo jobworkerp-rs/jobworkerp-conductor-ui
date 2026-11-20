@@ -12,7 +12,7 @@ and shares its look. Japanese and English.
 
 | UI     | jobworkerp-conductor | jobworkerp-rs |
 | ------ | -------------------- | ------------- |
-| v0.1.0 | v0.1.2               | v0.25.0       |
+| v0.1.1 | v0.1.2               | v0.25.0       |
 
 The UI talks to the gRPC APIs of these versions; it is built and tested against them.
 
