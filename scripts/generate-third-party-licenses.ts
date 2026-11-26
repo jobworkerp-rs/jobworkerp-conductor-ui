@@ -78,8 +78,8 @@ function javascriptPackages(): PackageLicense[] {
 
 /**
  * cargo-about enforces about.toml itself (--fail). It runs from CARGO_ABOUT,
- * else the pinned copy scripts/install-cargo-about.sh puts in .tools/, else
- * as `cargo about`. Without --output-file it writes the listing to stdout.
+ * else the pinned copy installed into .tools/cargo-about (see CLAUDE.md),
+ * else as `cargo about`. Without --output-file it writes the listing to stdout.
  */
 function rustCrates(): string {
   const pinned = join(ROOT, ".tools", "cargo-about", "cargo-about")

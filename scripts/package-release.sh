@@ -2,9 +2,11 @@
 # Usage: package-release.sh <version> <dist-dir> <third-party-licenses> <out-dir>
 #
 # Packs a release's static archive, jobworkerp-conductor-ui-v<version>.tar.gz:
-# the built screens (web/), the runtime config generator, and the licenses.
-# It serves from any static server and is what conductor's all-in-one image
-# bundles. <version> must be package.json's, so the archive matches its tag.
+# the built screens (web/), the runtime config generator, the Caddyfile and
+# serve.sh that serve it (the image is built from exactly these), and the
+# licenses. It serves from any static server and is what conductor's
+# all-in-one image bundles. <version> must be package.json's, so the archive
+# matches its tag.
 #
 # Entries are sorted, owned by root and dated SOURCE_DATE_EPOCH (else the
 # last commit), so the same inputs always give the same bytes. Needs GNU tar.
@@ -31,7 +33,8 @@ trap 'rm -rf "${work}"' EXIT
 stage="${work}/${name}"
 mkdir -p "${stage}"
 cp -R "${dist}" "${stage}/web"
-install -m 0755 "${ROOT_DIR}/docker/generate-config.sh" "${stage}/generate-config.sh"
+install -m 0755 "${ROOT_DIR}/docker/generate-config.sh" "${ROOT_DIR}/docker/serve.sh" "${stage}/"
+install -m 0644 "${ROOT_DIR}/docker/Caddyfile" "${stage}/Caddyfile"
 install -m 0644 "${ROOT_DIR}/LICENSE" "${ROOT_DIR}/README.md" "${ROOT_DIR}/README_ja.md" "${stage}/"
 install -m 0644 "${licenses}" "${stage}/THIRD-PARTY-LICENSES.txt"
 

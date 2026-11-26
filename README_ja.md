@@ -8,7 +8,7 @@
 
 | 画面   | jobworkerp-conductor | jobworkerp-rs |
 | ------ | -------------------- | ------------- |
-| v0.1.1 | v0.1.2               | v0.25.0       |
+| v0.1.2 | v0.1.2               | v0.25.0       |
 
 画面はこれらの版の gRPC API を使い、これらの版でビルド・テストしています。
 
@@ -40,14 +40,17 @@ gh attestation verify oci://ghcr.io/jobworkerp-rs/jobworkerp-conductor-ui:latest
 
 ### 静的ファイル
 
-各[リリース](https://github.com/jobworkerp-rs/jobworkerp-conductor-ui/releases)には `jobworkerp-conductor-ui-vX.Y.Z.tar.gz`（と `SHA256SUMS`）があります。その中の `web/` を任意の静的サーバーで配信し、存在しないパスには `web/index.html` を返してください（画面はブラウザ内でページを切り替えます）。`web/config.js` は下記の環境変数から作ります。
+各[リリース](https://github.com/jobworkerp-rs/jobworkerp-conductor-ui/releases)には `jobworkerp-conductor-ui-vX.Y.Z.tar.gz`（と `SHA256SUMS`）があり、macOS を含むどの OS でもコンテナなしで動かせます。[Caddy](https://caddyserver.com/docs/install) を入れておけば（macOS では `brew install caddy`）、同梱の `serve.sh` がイメージと同じ方法で画面を配信します。
 
 ```bash
-CONDUCTOR_UI_CONDUCTOR_URL=http://conductor.internal:9090 \
-  ./generate-config.sh web/config.js
+tar -xzf jobworkerp-conductor-ui-vX.Y.Z.tar.gz
+cd jobworkerp-conductor-ui-vX.Y.Z
+CONDUCTOR_UI_CONDUCTOR_URL=http://localhost:9090 ./serve.sh   # http://localhost:8080
 ```
 
-`config.js` と `index.html` はキャッシュさせずに配信してください。`web/assets/` のファイルは名前にハッシュが入るので、長期間キャッシュできます。
+`serve.sh` は下記の環境変数から `config.js` を一時ディレクトリに作り、同梱の `Caddyfile` で Caddy を起動します。ポートは `CONDUCTOR_UI_PORT` で変えられます。
+
+ほかの静的サーバーを使う場合は、`web/` を配信し、存在しないパスには `web/index.html` を返してください（画面はブラウザ内でページを切り替えます）。`web/config.js` は `./generate-config.sh web/config.js` で下記の環境変数から作ります。`config.js` と `index.html` はキャッシュさせずに配信してください。`web/assets/` のファイルは名前にハッシュが入るので、長期間キャッシュできます。
 
 ## ランタイム設定
 

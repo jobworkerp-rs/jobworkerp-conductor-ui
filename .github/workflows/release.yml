@@ -68,7 +68,7 @@ jobs:
 
       # Exports CARGO_ABOUT for the build.
       - name: Install cargo-about
-        run: bash scripts/install-cargo-about.sh "${RUNNER_TEMP}/cargo-about"
+        uses: sutr-app/portable-binary-release/install-cargo-about@a02e3397dffd237ccfe49945304a185533a67ec7 # v1.0.0
 
       - name: Build the release
         run: bash scripts/build-release.sh
@@ -126,6 +126,10 @@ jobs:
 
       - name: Check the image
         run: bash scripts/test-image.sh conductor-ui:verify
+
+      # The archive serves the same way without a container (serve.sh).
+      - name: Check the archive's serve.sh
+        run: bash scripts/test-serve.sh dist/jobworkerp-conductor-ui-v*.tar.gz
 
   publish:
     name: Publish GitHub Release

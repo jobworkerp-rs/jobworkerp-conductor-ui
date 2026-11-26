@@ -27,6 +27,7 @@ PINNED_IMAGE = re.compile(r"^[\w./-]+(:[\w.-]+)?@sha256:[0-9a-f]{64}$")
 BUILD_SCRIPT = "scripts/build-release.sh"
 TAG_SCRIPT = "scripts/check-release-tag.sh"
 IMAGE_TEST = "scripts/test-image.sh"
+SERVE_TEST = "scripts/test-serve.sh"
 UNPACK_SCRIPT = "scripts/unpack-release.sh"
 ARCHIVE = "jobworkerp-conductor-ui-vX.Y.Z.tar.gz"
 IMAGE = "ghcr.io/jobworkerp-rs/jobworkerp-conductor-ui"
@@ -50,6 +51,9 @@ WRITE_SCOPES = {
     "image": {"packages", "id-token", "attestations"},
 }
 IMAGE_JOBS = ("image-verify", "image")
+# The license listing needs the pinned cargo-about, installed by the shared
+# action pinned like any other.
+CARGO_ABOUT_ACTION = "sutr-app/portable-binary-release/install-cargo-about"
 
 
 def load(path):
@@ -92,7 +96,7 @@ def check_common(wf_name, wf):
         fail(f"{wf_name}: workflow permissions must be exactly contents: read")
     for name, job in (wf.get("jobs") or {}).items():
         if job.get("if") != GITHUB_ONLY:
-            fail(f"{wf_name}:{name}: missing `if: {GITHUB_ONLY}` (gitea must never run it)")
+            fail(f"{wf_name}:{name}: missing `if: {GITHUB_ONLY}` (only GitHub may run it)")
         unexpected = labels(job.get("runs-on")) - GITHUB_HOSTED
         if unexpected:
             fail(f"{wf_name}:{name}: runs on non GitHub-hosted runners {sorted(unexpected)}")
@@ -139,13 +143,16 @@ def check_release(wf):
     for script in (TAG_SCRIPT, BUILD_SCRIPT):
         if not any(script in run for run in runs(build)):
             fail(f"release.yml: build must run {script}")
+    if not uses_of(build, CARGO_ABOUT_ACTION):
+        fail(f"release.yml: build must install cargo-about with {CARGO_ABOUT_ACTION}")
     if (wf.get("env") or {}).get("IMAGE") != IMAGE:
         fail(f"release.yml: IMAGE must be {IMAGE}")
     for name in IMAGE_JOBS:
         failures += check_image_job(name, jobs[name], wf.get("env") or {})
     verify, publish = jobs["image-verify"], jobs["image"]
-    if not any(IMAGE_TEST in run for run in runs(verify)):
-        fail(f"release.yml: image-verify must run {IMAGE_TEST}")
+    for test in (IMAGE_TEST, SERVE_TEST):
+        if not any(test in run for run in runs(verify)):
+            fail(f"release.yml: image-verify must run {test}")
     if any((b.get("with") or {}).get("push") for b in uses_of(verify, "docker/build-push-action")):
         fail("release.yml: image-verify must not push")
     pushes = uses_of(publish, "docker/build-push-action")
@@ -265,6 +272,9 @@ MUTATIONS = {
         {"run": "pnpm install"}
     ),
     "tag check dropped": lambda wf: step_running(wf, "build", TAG_SCRIPT).update({"run": "true"}),
+    "cargo-about installed by a script": lambda wf: wf["jobs"]["build"]["steps"].remove(
+        step_using(wf, "build", CARGO_ABOUT_ACTION)
+    ),
     "release build elsewhere": lambda wf: step_running(wf, "build", BUILD_SCRIPT).update(
         {"run": "pnpm build"}
     ),
@@ -281,6 +291,9 @@ MUTATIONS = {
     ),
     "contents write token on image": lambda wf: wf["jobs"]["image"]["permissions"].update(
         {"contents": "write"}
+    ),
+    "serve check dropped": lambda wf: step_running(wf, "image-verify", SERVE_TEST).update(
+        {"run": "true"}
     ),
     "image check dropped": lambda wf: step_running(wf, "image-verify", IMAGE_TEST).update(
         {"run": "true"}

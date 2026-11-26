@@ -12,7 +12,7 @@ and shares its look. Japanese and English.
 
 | UI     | jobworkerp-conductor | jobworkerp-rs |
 | ------ | -------------------- | ------------- |
-| v0.1.1 | v0.1.2               | v0.25.0       |
+| v0.1.2 | v0.1.2               | v0.25.0       |
 
 The UI talks to the gRPC APIs of these versions; it is built and tested against them.
 
@@ -55,17 +55,24 @@ gh attestation verify oci://ghcr.io/jobworkerp-rs/jobworkerp-conductor-ui:latest
 ### Static files
 
 Each [release](https://github.com/jobworkerp-rs/jobworkerp-conductor-ui/releases) has
-`jobworkerp-conductor-ui-vX.Y.Z.tar.gz` (with `SHA256SUMS`). Serve its `web/` directory
-from any static server, answering unknown paths with `web/index.html` (the UI routes in
-the browser), and write `web/config.js` from the variables below:
+`jobworkerp-conductor-ui-vX.Y.Z.tar.gz` (with `SHA256SUMS`), which runs without a container
+on any OS, macOS included. With [Caddy](https://caddyserver.com/docs/install) installed
+(`brew install caddy` on macOS), its `serve.sh` serves the UI just like the image does:
 
 ```bash
-CONDUCTOR_UI_CONDUCTOR_URL=http://conductor.internal:9090 \
-  ./generate-config.sh web/config.js
+tar -xzf jobworkerp-conductor-ui-vX.Y.Z.tar.gz
+cd jobworkerp-conductor-ui-vX.Y.Z
+CONDUCTOR_UI_CONDUCTOR_URL=http://localhost:9090 ./serve.sh   # http://localhost:8080
 ```
 
-Serve `config.js` and `index.html` without caching; files under `web/assets/` have hashed
-names and can be cached for good.
+`serve.sh` writes `config.js` from the variables below into a temporary directory and
+runs Caddy with the bundled `Caddyfile`; `CONDUCTOR_UI_PORT` changes the port.
+
+To use another static server instead, serve the `web/` directory, answering unknown paths
+with `web/index.html` (the UI routes in the browser), and write `web/config.js` from the
+variables below with `./generate-config.sh web/config.js`. Serve `config.js` and
+`index.html` without caching; files under `web/assets/` have hashed names and can be
+cached for good.
 
 ## Runtime configuration
 

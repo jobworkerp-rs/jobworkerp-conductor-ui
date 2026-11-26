@@ -3,9 +3,9 @@
 #
 # Generates TypeScript (ts-proto, same options as jobworkerp-rs admin-ui) from
 # proto/ into src/lib/grpc. The output records the protoc version, so only the
-# pinned protoc is accepted: install it with
-#   bash scripts/install-protoc.sh .tools/protoc
-# (picked up automatically) or point PROTOC at it.
+# pinned protoc (scripts/lib/protoc-release.sh) is accepted: install it into
+# .tools/protoc (picked up automatically) with portable-binary-release's
+# scripts/install-protoc.sh, see CLAUDE.md, or point PROTOC at it.
 set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -19,9 +19,9 @@ if [[ -z "${PROTOC-}" && -x "${ROOT_DIR}/.tools/protoc/bin/protoc" ]]; then
   PROTOC="${ROOT_DIR}/.tools/protoc/bin/protoc"
 fi
 PROTOC=${PROTOC:-protoc}
-version=$("${PROTOC}" --version 2>/dev/null) || die "protoc not found (run scripts/install-protoc.sh .tools/protoc)"
+version=$("${PROTOC}" --version 2>/dev/null) || die "protoc not found (install it into .tools/protoc, see CLAUDE.md)"
 [[ "${version}" == "libprotoc ${PROTOC_VERSION}" ]] \
-  || die "protoc ${PROTOC_VERSION} required, found '${version}' (run scripts/install-protoc.sh .tools/protoc)"
+  || die "protoc ${PROTOC_VERSION} required, found '${version}' (install it into .tools/protoc, see CLAUDE.md)"
 
 plugin="${ROOT_DIR}/node_modules/.bin/protoc-gen-ts_proto"
 [[ -x "${plugin}" ]] || die "ts-proto is not installed (run pnpm install)"

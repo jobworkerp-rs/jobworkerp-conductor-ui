@@ -16,7 +16,10 @@ out="${ROOT_DIR}/.release"
 version=$(ui_version)
 
 cd "${ROOT_DIR}"
-pnpm build
+# Neither .env files nor VITE_* from this shell may reach the bundle.
+while read -r name; do unset "${name}"; done < <(compgen -e | grep '^VITE_' || true)
+CONDUCTOR_UI_RELEASE_BUILD=1 pnpm build
+bash scripts/check-bundle-env.sh dist
 mkdir -p "${out}"
 pnpm exec tsx scripts/generate-third-party-licenses.ts "${out}/THIRD-PARTY-LICENSES.txt"
 archive=$(bash scripts/package-release.sh "${version}" dist "${out}/THIRD-PARTY-LICENSES.txt" "${out}")

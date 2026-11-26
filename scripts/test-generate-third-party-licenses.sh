@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests scripts/generate-third-party-licenses.ts: the real listing, and that
 # a package outside the accepted licenses fails it. The real listing needs
-# cargo-about (CARGO_ABOUT, or scripts/install-cargo-about.sh .tools/cargo-about).
+# cargo-about (CARGO_ABOUT, or the pinned copy in .tools/cargo-about).
 set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)

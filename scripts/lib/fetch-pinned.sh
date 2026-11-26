@@ -1,6 +1,6 @@
 # shellcheck shell=bash
-# Shared by the install-*.sh scripts, which fetch release tools at a pinned
-# version so every runner uses the same, publicly visible build.
+# Fetches tools at a pinned version (the CI's actionlint), so every runner
+# uses the same, publicly visible build.
 #
 # Kept compatible with the bash 3.2 shipped with macOS.
 
@@ -22,13 +22,5 @@ fetch_pinned() {
     printf 'ERROR: checksum mismatch for %s: expected %s, got %s\n' \
       "$(basename "${out}")" "${expected}" "${actual}" >&2
     return 1
-  fi
-}
-
-# export_github_env <name> <value>: make <name> available to later steps of a
-# GitHub Actions job; a no-op elsewhere.
-export_github_env() {
-  if [[ -n "${GITHUB_ENV-}" ]]; then
-    echo "$1=$2" >>"${GITHUB_ENV}"
   fi
 }

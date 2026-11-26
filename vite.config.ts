@@ -6,6 +6,9 @@ import tailwindcss from "@tailwindcss/vite"
 
 export default defineConfig({
   plugins: [react(), tailwindcss() as unknown as Plugin],
+  // A release reads its settings from config.js only; a developer's .env
+  // must not end up in the published bundle (scripts/build-release.sh).
+  envDir: process.env.CONDUCTOR_UI_RELEASE_BUILD ? false : undefined,
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

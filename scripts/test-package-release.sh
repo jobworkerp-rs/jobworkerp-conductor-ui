@@ -23,13 +23,15 @@ archive="jobworkerp-conductor-ui-v${version}.tar.gz"
 if bash "${SUT}" "${version}" "${work}/dist" "${work}/licenses.txt" "${work}/out1" >/dev/null; then
   listing=$(tar -tzf "${work}/out1/${archive}" | sort | tr '\n' ' ')
   top="jobworkerp-conductor-ui-v${version}"
-  expected="${top}/ ${top}/LICENSE ${top}/README.md ${top}/README_ja.md ${top}/THIRD-PARTY-LICENSES.txt ${top}/generate-config.sh ${top}/web/ ${top}/web/assets/ ${top}/web/assets/index-abc.js ${top}/web/index.html "
+  expected="${top}/ ${top}/Caddyfile ${top}/LICENSE ${top}/README.md ${top}/README_ja.md ${top}/THIRD-PARTY-LICENSES.txt ${top}/generate-config.sh ${top}/serve.sh ${top}/web/ ${top}/web/assets/ ${top}/web/assets/index-abc.js ${top}/web/index.html "
   if [[ "${listing}" == "${expected}" ]]; then pass "lays out the archive"; else fail "lays out the archive: ${listing}"; fi
-  if tar -tvzf "${work}/out1/${archive}" | grep "generate-config.sh" | grep -q '^-rwxr-xr-x'; then
-    pass "keeps generate-config.sh executable"
-  else
-    fail "keeps generate-config.sh executable"
-  fi
+  for script in generate-config.sh serve.sh; do
+    if tar -tvzf "${work}/out1/${archive}" | grep "/${script}$" | grep -q '^-rwxr-xr-x'; then
+      pass "keeps ${script} executable"
+    else
+      fail "keeps ${script} executable"
+    fi
+  done
 else
   fail "builds the archive"
 fi
